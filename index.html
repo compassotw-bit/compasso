@@ -287,6 +287,11 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:20;opa
 .pcta .btn{text-decoration:none;text-align:center;font-size:10.5px;padding:12px 10px}
 .plan.feature .pcta .btn{background:var(--ink);color:var(--bone);box-shadow:none}
 .plan.feature .pcta .btn.line{background:transparent;color:var(--ink);box-shadow:inset 0 0 0 1px rgba(20,20,16,.4)}
+
+.join-steps{list-style:none;counter-reset:s;margin:14px 0 0;padding:0;max-width:28em}
+.join-steps li{counter-increment:s;position:relative;padding:9px 0 9px 30px;border-bottom:1px solid var(--rule);font-size:14px;line-height:1.6;text-align:left}
+.join-steps li::before{content:counter(s);position:absolute;left:0;top:9px;font-family:var(--display);font-size:13px;color:var(--dim)}
+@media (max-width:620px){.join-steps{margin-left:auto;margin-right:auto}}
 </style>
 </head>
 <body>
@@ -354,21 +359,26 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:20;opa
   <!-- PLANS -->
   <section class="view hidden" data-view="plans" data-i=".04">
     <h2 class="h">MEMBERSHIP<small>方案</small></h2>
-    <p class="intro">三種訓練方式，依你現在的程度選。BASE 和 CLASS 到 PULSE 藝文店櫃台結帳，PRO 請私訊正宏教練。</p>
+    <p class="intro">三種訓練方式，依你現在的程度選。BASE 與 CLASS 於 PULSE 藝文店櫃台結帳；PRO 請先預約諮詢。</p>
     <div id="plans" class="plans"></div>
     <div class="join">
       <div class="join-qr"><img src="img/line-qr.png" alt="COMPASSO LINE 群 QR code" width="600" height="600" loading="lazy"></div>
       <div class="join-txt">
         <div class="micro">Join the crew</div>
-        <h3>加入 COMPASSO 社群</h3>
-        <p>課程公告、臨時異動和每週訓練重點，都在 LINE 群。用另一支手機掃 QR code，或在手機上直接點下面的按鈕。</p>
+        <h3>成為 COMPASSO 會員</h3>
+        <ol class="join-steps">
+          <li>追蹤 Instagram @compasso.co</li>
+          <li>上一堂 CLASS，現場由教練提供 LINE 入群密碼</li>
+          <li>加入 LINE 社群，即可預約週三、週六早上的 BASE</li>
+        </ol>
+        <p>課程公告、臨時異動和每週訓練重點，都在 LINE 社群。</p>
         <div class="join-btns">
-          <a class="btn" href="https://line.me/ti/g2/qHIL_9BdFe3SKYjNhxibA0_E0HdprN4-FqCMng?utm_source=invitation&utm_medium=QR_code&utm_campaign=default" target="_blank" rel="noopener">加入 LINE 群</a>
+          <a class="btn" href="https://line.me/ti/g2/qHIL_9BdFe3SKYjNhxibA0_E0HdprN4-FqCMng?utm_source=invitation&utm_medium=QR_code&utm_campaign=default" target="_blank" rel="noopener">加入 LINE 社群</a>
           <a class="btn line" href="https://www.instagram.com/compasso.co/" target="_blank" rel="noopener">Instagram @compasso.co</a>
         </div>
       </div>
     </div>
-    <div class="pay"><b>結帳方式</b>BASE、CLASS：到 PULSE 藝文店櫃台結帳<br>PRO：私訊正宏教練詳談，不在櫃台結帳</div>
+    <div class="pay"><b>結帳方式</b>BASE、CLASS：PULSE 藝文店櫃台結帳<br>PRO：預約諮詢，評估後提供專屬方案</div>
     <div class="contact"><b>其他問題</b>電話 0911-236-909<br>compassotw@gmail.com</div>
   </section>
 
@@ -442,8 +452,8 @@ const MOVES=[
   {en:"Wall Balls",zh:"牆球",std:"100 下｜男 6kg 至 3m、女 4kg 至 2.7m",cues:["蹲到髖低於膝","用腿把球送出去，不是用手","接球直接下蹲，連成一個動作"],err:["蹲不夠深，不計次","做到力竭才休息"]}
 ];
 const PLANS=[
-  {n:"BASE",zh:"跟練團課",when:"週三、週六 07:30–09:00",price:"NT$300",unit:"／堂",items:["跟著正宏的課表訓練，不教學、只跟練","適合有基礎、想維持訓練強度的你","週三團課以 COMPASSO 會員為主"],pay:"PULSE 藝文店櫃台結帳"},
-  {n:"PRO",zh:"一對一教練",feature:true,when:"時間與地點另約",price:"私訊詳談",unit:"",items:["依目標量身安排的個人課表","日常飲食習慣規劃與體態管理陪跑","一對一、一對二或線上進行"],pay:"不在櫃台結帳",cta:[{t:"認識正宏教練",u:"https://cheng-hung-coaching.givingsole20.chatgpt.site"},{t:"私訊 @cheng___hung",u:"https://www.instagram.com/cheng___hung/"}]},
+  {n:"BASE",zh:"Open Training",when:"週三、週六 07:30–09:00",price:"NT$300",unit:"／堂",items:["按當週課表執行，現場不做教學","適合已有訓練基礎、想維持強度的你","週三與週六早上以 COMPASSO 會員為主"],pay:"PULSE 藝文店櫃台結帳"},
+  {n:"PRO",zh:"一對一教練",feature:true,when:"PULSE 藝文店，可依需求安排場館",price:"量身規劃",unit:"",items:["依目標量身安排的個人課表","日常飲食習慣規劃與體態管理陪跑","一對一、一對二或線上進行"],pay:"評估後提供專屬方案",cta:[{t:"預約諮詢",u:"https://www.instagram.com/cheng___hung/"},{t:"認識正宏教練",u:"https://cheng-hung-coaching.givingsole20.chatgpt.site"}]},
   {n:"CLASS",zh:"教練指導團課",when:"週五 19:00–20:00\n週六 09:00–10:00",price:"NT$800",unit:"／堂",items:["正宏教練親自下場看動作","依你的狀況做專業調整","每堂上限 8 人"],pay:"PULSE 藝文店櫃台結帳"}
 ];
 
