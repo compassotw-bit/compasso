@@ -263,6 +263,18 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:20;opa
 .mine-row{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--rule);font-size:14px}
 .mine-row b{font-family:var(--wide);font-stretch:112%;font-weight:600;letter-spacing:.1em;font-size:13px;margin-right:10px}
 .ghost{font-size:12px;color:var(--dim);border-bottom:1px solid var(--faint);padding-bottom:1px;letter-spacing:.06em}
+
+/* join */
+.join{display:grid;grid-template-columns:220px minmax(0,1fr);gap:32px;align-items:center;margin-top:40px;padding-top:32px;border-top:1px solid var(--rule)}
+.join-qr{background:#fff;padding:12px;border-radius:2px;box-shadow:0 30px 60px -20px rgba(0,0,0,.8)}
+.join-qr img{display:block;width:100%;height:auto}
+.join-txt h3{font-family:var(--wide);font-stretch:118%;font-weight:700;font-size:22px;letter-spacing:.06em;margin-top:8px}
+.join-txt p{color:var(--dim);font-size:14px;margin-top:10px;max-width:28em}
+.join-btns{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+.join-btns .btn{text-decoration:none;display:inline-block}
+.pay{margin-top:32px;padding:18px 0;border-top:1px solid var(--rule);border-bottom:1px solid var(--rule);font-size:15px;text-align:center}
+.pay b{display:block;font-family:var(--wide);font-stretch:112%;font-size:10.5px;font-weight:600;letter-spacing:.3em;color:var(--dim);margin-bottom:6px}
+@media (max-width:620px){.join{grid-template-columns:1fr;justify-items:center;text-align:center}.join-qr{width:200px}.join-btns{justify-content:center}.join-txt p{margin-left:auto;margin-right:auto}}
 </style>
 </head>
 <body>
@@ -288,7 +300,7 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:20;opa
   </div>
   <div class="cols">
     <p><b>Group</b>週三、六 07:30 COMPASSO 專屬團課<br>週五 19:00、週六 09:00 團課</p>
-    <p><b>Program</b>固定週課表<br>團課以外的日子以跑步為主</p>
+    <p><b>Program</b>週三、五、六固定團課<br>每堂上限 8 人</p>
     <p><b>Standard</b>八個站點的動作標準<br>教練提示與常見錯誤</p>
   </div>
 </section>
@@ -313,9 +325,9 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:20;opa
   <!-- PROGRAM -->
   <section class="view hidden" data-view="program" data-i=".02">
     <h2 class="h">PROGRAM<small>本週課表</small></h2>
-    <p class="intro">固定週課表。團課之外的日子安排跑步，一週選 3 到 5 天參加就好，不必每天練。</p>
+    <p class="intro">每週三、五、六固定團課，每堂上限 8 人。點日期看當天的課程內容。</p>
     <div class="week" id="week"></div>
-    <div class="legend"><i></i>有團課的日子，需先預約</div>
+    <div class="legend"><i></i>每堂上限 8 人，需先預約</div>
     <div id="dayDetail"></div>
   </section>
 
@@ -330,9 +342,22 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:20;opa
   <!-- PLANS -->
   <section class="view hidden" data-view="plans" data-i=".04">
     <h2 class="h">MEMBERSHIP<small>方案</small></h2>
-    <p class="intro">從每日課表開始，需要更多時再加上。目前價格未定，付款確認後由教練開通。</p>
+    <p class="intro">選好方案，到 PULSE 藝文店櫃台結帳即可。結帳後由教練幫你開通堂數，之後在網站上預約。</p>
     <div id="plans" class="plans"></div>
-    <div class="contact"><b>加入或詢問</b>電話 0911-236-909<br>compassotw@gmail.com<br>桃園市桃園區中山路 709 號 6 樓</div>
+    <div class="join">
+      <div class="join-qr"><img src="img/line-qr.png" alt="COMPASSO LINE 群 QR code" width="600" height="600" loading="lazy"></div>
+      <div class="join-txt">
+        <div class="micro">Join the crew</div>
+        <h3>加入 COMPASSO 社群</h3>
+        <p>課程公告、臨時異動和每週訓練重點，都在 LINE 群。用另一支手機掃 QR code，或在手機上直接點下面的按鈕。</p>
+        <div class="join-btns">
+          <a class="btn" href="https://line.me/ti/g2/qHIL_9BdFe3SKYjNhxibA0_E0HdprN4-FqCMng?utm_source=invitation&utm_medium=QR_code&utm_campaign=default" target="_blank" rel="noopener">加入 LINE 群</a>
+          <a class="btn line" href="https://www.instagram.com/compasso.co/" target="_blank" rel="noopener">Instagram @compasso.co</a>
+        </div>
+      </div>
+    </div>
+    <div class="pay"><b>結帳方式</b>到 PULSE 藝文店櫃台結帳即可。</div>
+    <div class="contact"><b>其他問題</b>電話 0911-236-909<br>compassotw@gmail.com</div>
   </section>
 
 </main>
@@ -383,13 +408,14 @@ const GROUP_BLOCKS={
   long:[{n:"集合",t:"",items:["提早 10 分鐘到，教練說明今天的站點"]},{n:"暖身",t:"15'",items:["動態活動度、站點熟悉"]},{n:"主課",t:"55'",items:["跑步與 HYROX 站點交替循環","強度依個人狀況調整，組數由教練現場指定"]},{n:"收操",t:"10'",items:["伸展與本週重點回顧"]}],
   short:[{n:"暖身",t:"10'",items:["動態活動度"]},{n:"主課",t:"40'",items:["站點循環或跑步間歇，依當週主題"]},{n:"收操",t:"10'",items:["伸展"]}]
 };
-const RUNS={
+const RUNS_UNUSED={
   1:{code:"RECOVERY",zh:"恢復跑",min:"40",blocks:[{n:"恢復跑",t:"30–40'",items:["Zone 2，全程能完整說話","前一天練很累就走跑交替"]},{n:"活動度",t:"10'",items:["髖、小腿、胸椎"]}]},
   2:{code:"INTERVAL",zh:"間歇跑",min:"50",blocks:[{n:"暖身",t:"15'",items:["輕鬆跑 12 分鐘，加速跑 3 趟"]},{n:"主課",t:"",items:["6 × 800m，5K 配速，組間慢跑 90 秒","剛開始練：4 組就好"]},{n:"收操",t:"10'",items:["慢跑轉走路，伸展"]}]},
   4:{code:"TEMPO",zh:"節奏跑",min:"50",blocks:[{n:"暖身",t:"15'",items:["輕鬆跑"]},{n:"主課",t:"20'",items:["節奏配速：能說短句、不能聊天","剛開始練：2 × 10 分鐘，中間走 2 分鐘"]},{n:"收操",t:"10'",items:["慢跑與伸展"]}]},
   0:{code:"LONG RUN",zh:"長距離",min:"60–90",blocks:[{n:"長跑",t:"60–90'",items:["輕鬆配速，最後 10 分鐘稍微加快","剛開始練：45 分鐘"]},{n:"補給",t:"",items:["超過 60 分鐘帶水，跑完 1 小時內吃一餐"]}]}
 };
-const DAY_SHORT={1:"恢復跑",2:"間歇",3:"團課",4:"節奏跑",5:"團課",6:"團課 ×2",0:"長跑"};
+const PROGRAM_DAYS=[3,5,6];
+const DAY_SHORT={3:"07:30",5:"19:00",6:"07:30 · 09:00"};
 const slotOf=c=>{if(c.slot)return c.slot;const d=new Date((c.date||"")+"T00:00:00").getDay();const s=SLOTS.find(x=>x.day===d&&x.start===(c.start||c.time));return s?s.key:"other";};
 const WD=["日","一","二","三","四","五","六"];
 const MOVES=[
@@ -404,14 +430,14 @@ const MOVES=[
   {en:"Wall Balls",zh:"牆球",std:"100 下｜男 6kg 至 3m、女 4kg 至 2.7m",cues:["蹲到髖低於膝","用腿把球送出去，不是用手","接球直接下蹲，連成一個動作"],err:["蹲不夠深，不計次","做到力竭才休息"]}
 ];
 const PLANS=[
-  {n:"BASE",zh:"月訂閱",items:["固定週課表與跑步訓練","完整動作庫與教練提示"]},
+  {n:"BASE",zh:"月訂閱",items:["週三、五、六固定課表","完整動作庫與教練提示"]},
   {n:"PRO",zh:"進階解鎖",feature:true,items:["BASE 全部內容","比賽模擬與賽前減量課表","團課優先預約","每月一次課表調整"]},
   {n:"CLASS",zh:"團課堂數",items:["週三、五、六實體團課","在這裡預約，剩餘堂數即時查看"]}
 ];
 
 
 /* ---------- STATE ---------- */
-const S={sessions:[],state:"loading",me:null,cred:null,selDay:new Date().getDay(),busy:false,pending:null,mode:"book"};
+const S={sessions:[],state:"loading",me:null,cred:null,selDay:(()=>{const t=new Date().getDay();for(let i=0;i<7;i++){const d=(t+i)%7;if([3,5,6].includes(d))return d;}return 3;})(),busy:false,pending:null,mode:"book"};
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const ymd=d=>d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
@@ -452,31 +478,26 @@ async function loadMe(){
 
 /* ---------- DIAL / TODAY / PROGRAM ---------- */
 function renderToday(){
-  const d=new Date(),dw=d.getDay(),slots=SLOTS.filter(x=>x.day===dw),run=RUNS[dw];
+  const d=new Date(),dw=d.getDay();
+  const today=S.sessions.filter(c=>c.date===todayStr()).sort((a,b)=>startOf(a).localeCompare(startOf(b)));
+  const next=S.sessions.find(c=>!c.closed);
   let txt;
-  if(slots.length){
-    const today=S.sessions.filter(c=>c.date===todayStr()).sort((a,b)=>startOf(a).localeCompare(startOf(b)));
-    const list=(today.length?today.map(c=>`${startOf(c)} ${c.title}`):slots.map(x=>`${x.start} ${x.title}`)).join("、");
-    txt=`<span class="k">TODAY · GROUP</span><span class="s">${esc(list)}</span>`;
-  }else if(run)txt=`<span class="k">${run.code}</span><span class="s">今天：${run.zh}，約 ${run.min} 分鐘</span>`;
-  else txt=`<span class="k">REST</span><span class="s">今天恢復。散步、伸展、睡足。</span>`;
-  $("#todayLine").innerHTML=`${txt}<button type="button" id="seeToday">看今天的內容</button>`;
-  $("#seeToday").onclick=()=>{S.selDay=dw;location.hash="program";renderProgram();};
+  if(today.length)txt=`<span class="k">TODAY · GROUP</span><span class="s">${esc(today.map(c=>`${startOf(c)} ${c.title}`).join("、"))}</span>`;
+  else if(next){const p=dparts(next.date);txt=`<span class="k">NEXT · GROUP</span><span class="s">${p.d} ${p.w} ${esc(next.start)}，${esc(next.title)}，剩 ${Math.max(0,next.capacity-next.booked)} 個位子</span>`;}
+  else txt=`<span class="k">WED · FRI · SAT</span><span class="s">每週三、五、六固定團課</span>`;
+  $("#todayLine").innerHTML=`${txt}<button type="button" id="seeToday">${today.length||!next?"看今天的內容":"去預約"}</button>`;
+  $("#seeToday").onclick=()=>{if(today.length){S.selDay=dw;location.hash="program";renderProgram();}else location.hash="classes";};
 }
 
 /* ---------- PROGRAM ---------- */
 function blocksHTML(bl){return bl.map(b=>`<div class="blk"><div class="n">${esc(b.n)}${b.t?`<small>${esc(b.t)}</small>`:""}</div><ul>${b.items.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div>`).join("");}
 function renderProgram(){
   const today=new Date().getDay();
-  $("#week").innerHTML=DIAL_ORDER.map(d=>{const g=SLOTS.some(x=>x.day===d);return `<button class="wd ${g?"group":""} ${d===S.selDay?"sel":""}" aria-current="${d===today}" data-d="${d}"><div class="a">${d===today?"今天":"週"+WD[d]}</div><div class="b">${DAY_SHORT[d]||"休"}</div></button>`;}).join("");
+  $("#week").style.gridTemplateColumns="repeat(3,1fr)";
+  $("#week").innerHTML=PROGRAM_DAYS.map(d=>`<button class="wd group ${d===S.selDay?"sel":""}" aria-current="${d===today}" data-d="${d}"><div class="a">${d===today?"今天・週"+WD[d]:"週"+WD[d]}</div><div class="b">${DAY_SHORT[d]}</div></button>`).join("");
   $("#week").querySelectorAll(".wd").forEach(x=>x.onclick=()=>{S.selDay=+x.dataset.d;renderProgram();});
-  const d=S.selDay,slots=SLOTS.filter(x=>x.day===d),run=RUNS[d];
-  let out="";
-  slots.forEach(s=>{
-    out+=`<div class="session"><div class="title"><b>${s.start}–${s.end}</b><span>${s.excl?"COMPASSO 專屬":"團課"}，請先預約</span></div><div class="zh">${esc(s.title)}，PULSE GYM</div>${blocksHTML(s.excl?GROUP_BLOCKS.long:GROUP_BLOCKS.short)}<p style="margin-top:14px"><a class="link" href="#classes">去預約</a></p></div>`;
-  });
-  if(run) out+=`<div class="session"><div class="title"><b>${run.code}</b><span>約 ${run.min} 分鐘，自主訓練</span></div><div class="zh">${run.zh}</div>${blocksHTML(run.blocks)}</div>`;
-  $("#dayDetail").innerHTML=out||`<p class="rest-note">週${WD[d]}休息。散步 20–30 分鐘、伸展、睡足，恢復也是訓練。</p>`;
+  const d=S.selDay,slots=SLOTS.filter(x=>x.day===d);
+  $("#dayDetail").innerHTML=slots.map(s=>`<div class="session"><div class="title"><b>${s.start}–${s.end}</b><span>${s.excl?"COMPASSO 專屬":"團課"}，上限 8 人，請先預約</span></div><div class="zh">${esc(s.title)}，PULSE 藝文店</div>${blocksHTML(s.excl?GROUP_BLOCKS.long:GROUP_BLOCKS.short)}<p style="margin-top:14px"><a class="link" href="#classes">去預約</a></p></div>`).join("");
 }
 
 /* ---------- LIBRARY & PLANS ---------- */
@@ -487,7 +508,7 @@ function renderLibrary(){
   $("#library").querySelectorAll(".mv>button").forEach(b=>b.onclick=()=>{const p=b.parentElement,o=p.dataset.open!=="true";p.dataset.open=o;b.setAttribute("aria-expanded",o);});
 }
 function renderPlans(){
-  $("#plans").innerHTML=PLANS.map(p=>`<div class="plan ${p.feature?"feature":""}"><div><div class="pn">${p.n}</div><div class="pz">${p.zh}</div><div class="pp">價格未定</div></div><ul>${p.items.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div>`).join("");
+  $("#plans").innerHTML=PLANS.map(p=>`<div class="plan ${p.feature?"feature":""}"><div><div class="pn">${p.n}</div><div class="pz">${p.zh}</div><div class="pp">櫃台結帳</div></div><ul>${p.items.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div>`).join("");
 }
 
 
