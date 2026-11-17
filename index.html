@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>COMPASSO HYBRID HUB</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,300..700&family=Saira+Condensed:wght@200;300;400;600&family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#141410; --char:#1E1E1B; --slate:#2A2A26; --bone:#F3F1EA; --dim:rgba(243,241,234,.56); --faint:rgba(243,241,234,.32);
+  --rule:rgba(243,241,234,.12); --needle:#D8421B;
+  --display:"Saira Condensed","Noto Sans TC",sans-serif;
+  --wide:"Archivo","Noto Sans TC",sans-serif;
+  --body:"Archivo","Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;
+  --pad:clamp(20px,5vw,40px);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{background:#0C0C0A}
+body{font-family:var(--body);font-size:16px;line-height:1.8;font-weight:300;color:var(--bone);line-break:strict;padding-bottom:80px;-webkit-font-smoothing:antialiased;
+  background:#0C0C0A}
+a{color:inherit}
+button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
+:focus-visible{outline:1px solid var(--bone);outline-offset:3px}
+.hidden{display:none!important}
+.micro{font-family:var(--wide);font-stretch:112%;font-size:10.5px;font-weight:500;letter-spacing:.32em;text-transform:uppercase;color:var(--dim)}
+
+/* stage */
+.stage{position:relative;min-height:78vh;background:radial-gradient(90% 80% at 50% 0%,#3B3B36 0%,#252522 40%,var(--ink) 80%);display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:90px var(--pad) 60px;overflow:hidden}
+.corner{position:absolute;top:26px}
+.corner.l{left:var(--pad);text-align:left}.corner.r{right:var(--pad);text-align:right}
+.corner b{display:block;color:var(--bone);font-weight:600;margin-top:4px}
+.dial{position:absolute;width:min(560px,120vw);left:50%;top:50%;transform:translate(-50%,-52%);opacity:.9;pointer-events:none}
+.dial text{font-family:"Noto Sans TC";font-size:9px;fill:var(--faint)}
+.dial .on{fill:var(--bone)}
+#needle{transform-origin:130px 130px;transition:transform 1.8s cubic-bezier(.2,.8,.2,1) .3s}
+@media (prefers-reduced-motion:reduce){#needle{transition:none}}
+.kicker{position:relative;margin-bottom:18px}
+.word{position:relative;font-family:var(--wide);font-stretch:125%;font-weight:700;font-size:clamp(44px,11vw,118px);line-height:.95;letter-spacing:.04em;color:var(--bone);text-shadow:0 20px 60px rgba(0,0,0,.6)}
+#greet{position:relative;margin-top:22px;font-family:"Noto Sans TC";font-weight:300;font-size:15px;letter-spacing:.12em;color:var(--dim)}
+.today-line{position:relative;margin-top:34px;display:flex;gap:22px;align-items:center;justify-content:center;flex-wrap:wrap}
+.today-line .k{font-family:var(--wide);font-stretch:118%;font-weight:600;font-size:13px;letter-spacing:.3em;color:var(--bone)}
+.today-line .s{font-size:13px;color:var(--dim)}
+.today-line button{font-family:var(--wide);font-stretch:112%;font-size:10.5px;font-weight:500;letter-spacing:.28em;text-transform:uppercase;padding:11px 22px;border:1px solid var(--faint);border-radius:2px;color:var(--bone);background:rgba(20,20,16,.4);box-shadow:0 10px 30px rgba(0,0,0,.4)}
+.scrollcue{position:absolute;bottom:22px;left:50%;transform:translateX(-50%)}
+
+/* rail */
+.rail{position:fixed;left:22px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:22px;z-index:8}
+.rail a{text-decoration:none;display:flex;align-items:center;gap:10px;color:var(--faint);font-family:var(--wide);font-stretch:112%;font-size:10px;font-weight:500;letter-spacing:.24em}
+.rail a i{width:5px;height:5px;border-radius:50%;background:var(--faint)}
+.rail a span{opacity:0;transition:opacity .2s}
+.rail a:hover span,.rail a[aria-current="page"] span{opacity:1}
+.rail a[aria-current="page"]{color:var(--bone)}
+.rail a[aria-current="page"] i{background:var(--needle)}
+@media (max-width:1060px){.rail{display:none}}
+
+/* panel = floating screen */
+main{max-width:860px;margin:0 auto;padding:0 var(--pad)}
+.view{position:relative;margin:10px 0 40px;padding:clamp(28px,5vw,56px);border-radius:3px;
+  background:linear-gradient(180deg,#262623 0%,#1B1B18 100%);box-shadow:0 40px 80px -20px rgba(0,0,0,.75),0 0 0 1px rgba(243,241,234,.05) inset}
+.view::before{content:attr(data-i);position:absolute;left:-2px;bottom:-26px;font-family:var(--wide);font-stretch:112%;font-size:11px;letter-spacing:.2em;color:var(--faint)}
+.ph{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;margin-bottom:6px}
+.h{font-family:var(--wide);font-stretch:125%;font-weight:700;font-size:clamp(26px,4.4vw,38px);letter-spacing:.08em;line-height:1.1}
+.h small{display:block;font-family:"Noto Sans TC";font-stretch:100%;font-size:14px;font-weight:400;letter-spacing:.2em;color:var(--dim);margin-top:10px}
+.intro{color:var(--dim);margin-top:14px;max-width:30em;font-size:15px}
+.sub{display:flex;justify-content:space-between;align-items:baseline;margin:46px 0 4px;padding-bottom:12px;border-bottom:1px solid var(--rule)}
+.sub h3{font-family:var(--wide);font-stretch:118%;font-weight:600;font-size:12px;letter-spacing:.3em;text-transform:uppercase}
+.sub span{font-size:12px;color:var(--dim)}
+
+/* classes */
+.cls{display:grid;grid-template-columns:128px minmax(0,1fr) auto;gap:20px;padding:24px 0;border-bottom:1px solid var(--rule);align-items:center}
+.cls .date .d{font-family:var(--display);font-weight:200;font-size:50px;line-height:.9}
+.cls .date .w{font-size:12px;color:var(--dim);margin-top:6px;letter-spacing:.2em}
+.cls .time{font-family:var(--wide);font-stretch:118%;font-weight:500;font-size:17px;letter-spacing:.14em}
+.cls .meta{font-size:13px;color:var(--dim);margin-top:2px}
+.seats{display:flex;gap:4px;margin-top:12px;flex-wrap:wrap}
+.seats i{width:3px;height:16px;background:rgba(243,241,234,.16)}
+.seats i.f{background:var(--bone)}
+.seats.full i.f{background:var(--needle)}
+.cnt{font-size:12px;color:var(--dim);margin-top:6px;letter-spacing:.06em}
+.act{text-align:right}
+.btn{font-family:var(--wide);font-stretch:112%;font-weight:600;font-size:11px;letter-spacing:.28em;text-transform:uppercase;padding:13px 24px;background:var(--bone);color:var(--ink);border-radius:2px;white-space:nowrap;box-shadow:0 12px 30px rgba(0,0,0,.45)}
+.btn.line{background:transparent;color:var(--bone);box-shadow:inset 0 0 0 1px var(--faint)}
+.btn:disabled{background:transparent;color:var(--faint);box-shadow:inset 0 0 0 1px var(--rule);cursor:not-allowed}
+.mine{font-size:12px;color:var(--needle);margin-top:6px;letter-spacing:.1em}
+@media (max-width:560px){.cls{grid-template-columns:78px minmax(0,1fr);gap:14px}.cls .act{grid-column:2;text-align:left}.cls .date .d{font-size:28px}}
+.credit{display:flex;align-items:flex-end;gap:16px;padding:26px 0;border-bottom:1px solid var(--rule)}
+.credit .n{font-family:var(--display);font-weight:200;font-size:76px;line-height:.85}
+.credit .t{font-size:13px;color:var(--dim)}
+
+/* program */
+.levels{display:flex;gap:8px;margin-top:26px;flex-wrap:wrap}
+.lv{padding:10px 18px;border-radius:2px;box-shadow:inset 0 0 0 1px var(--rule);font-size:13px;letter-spacing:.12em;color:var(--dim)}
+.lv[aria-pressed="true"]{background:var(--bone);color:var(--ink);box-shadow:0 10px 26px rgba(0,0,0,.45)}
+.lvdesc{font-size:14px;color:var(--dim);margin-top:12px;max-width:32em}
+.week{display:grid;grid-template-columns:repeat(7,1fr);margin-top:30px;gap:6px}
+.wd{padding:14px 0 16px;text-align:center;border-radius:2px;background:rgba(243,241,234,.03);position:relative;box-shadow:0 0 0 1px var(--rule) inset}
+.wd .a{font-size:11px;color:var(--dim);letter-spacing:.1em}
+.wd .b{font-family:var(--wide);font-stretch:112%;font-weight:500;font-size:12px;letter-spacing:.14em;margin-top:4px;white-space:nowrap}
+.wd.rest .b{color:var(--faint)}
+.wd.group::after{content:"";position:absolute;top:8px;right:8px;width:4px;height:4px;border-radius:50%;background:var(--needle)}
+.wd[aria-current="true"] .a{color:var(--bone)}
+.wd.sel{background:var(--bone);color:var(--ink);box-shadow:0 14px 30px rgba(0,0,0,.5)}
+.wd.sel .a{color:rgba(20,20,16,.6)}
+.wd.sel.rest .b{color:rgba(20,20,16,.45)}
+@media (max-width:460px){.week{gap:3px}.wd .b{font-size:10px;letter-spacing:.02em}}
+.legend{font-size:12px;color:var(--dim);margin-top:12px;display:flex;align-items:center;gap:8px}
+.legend i{width:4px;height:4px;border-radius:50%;background:var(--needle);display:inline-block}
+.session{margin-top:36px}
+.session .title{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap}
+.session .title b{font-family:var(--wide);font-stretch:125%;font-weight:700;font-size:34px;letter-spacing:.1em;line-height:1}
+.session .title span{font-size:13px;color:var(--dim);letter-spacing:.06em}
+.session .zh{font-size:14px;color:var(--dim);margin-top:8px}
+.blk{display:grid;grid-template-columns:130px minmax(0,1fr);gap:18px;padding:18px 0;border-bottom:1px solid var(--rule)}
+.blk:first-of-type{margin-top:20px;border-top:1px solid var(--rule)}
+.blk .n{font-weight:500;font-size:14px;letter-spacing:.08em}
+.blk .n small{display:block;font-family:var(--wide);font-stretch:112%;font-size:12px;letter-spacing:.18em;color:var(--dim);font-weight:500;margin-top:2px}
+.blk ul{list-style:none}
+.blk li{padding:2px 0;font-weight:400}
+.blk li+li{color:var(--dim);font-size:14px;font-weight:300}
+@media (max-width:560px){.blk{grid-template-columns:1fr;gap:4px}}
+.rest-note{margin-top:34px;padding:24px 0;border-top:1px solid var(--rule);color:var(--dim);max-width:30em}
+
+/* library */
+.mv{border-bottom:1px solid var(--rule)}
+.mv:first-of-type{border-top:1px solid var(--rule);margin-top:30px}
+.mv>button{width:100%;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;padding:22px 0;text-align:left;align-items:baseline}
+.mv .en{font-family:var(--wide);font-stretch:118%;font-weight:600;font-size:clamp(17px,2.6vw,22px);letter-spacing:.12em;text-transform:uppercase;line-height:1.2}
+.mv .zhn{font-size:13px;color:var(--dim);margin-left:12px;letter-spacing:.1em}
+.mv .std{grid-column:1;font-size:13px;color:var(--dim)}
+.mv .pm{grid-row:1;grid-column:2;font-weight:200;font-size:22px;color:var(--dim);transition:transform .25s}
+.mv[data-open="true"] .pm{transform:rotate(45deg);color:var(--bone)}
+.mv .more{display:none;padding:0 0 24px}
+.mv[data-open="true"] .more{display:grid;grid-template-columns:1fr 1fr;gap:28px}
+.mv .more h4{font-family:var(--wide);font-stretch:112%;font-size:10.5px;font-weight:500;letter-spacing:.28em;color:var(--dim);margin-bottom:8px}
+.mv .more ul{list-style:none;font-size:14px}
+.mv .more li{padding:5px 0;border-top:1px solid var(--rule);font-weight:400}
+@media (max-width:560px){.mv[data-open="true"] .more{grid-template-columns:1fr}}
+.fine{font-size:12px;color:var(--faint);margin-top:18px}
+
+/* plans */
+.plans{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:30px}
+.plan{padding:26px 22px;border-radius:2px;background:rgba(243,241,234,.03);box-shadow:0 0 0 1px var(--rule) inset}
+.plan.feature{background:var(--bone);color:var(--ink);box-shadow:0 30px 60px -16px rgba(0,0,0,.7)}
+.plan .pn{font-family:var(--wide);font-stretch:125%;font-weight:700;font-size:24px;letter-spacing:.12em}
+.plan .pz{font-size:13px;color:var(--dim);margin-top:4px;letter-spacing:.12em}
+.plan.feature .pz,.plan.feature .pp{color:rgba(20,20,16,.6)}
+.plan .pp{font-size:12px;color:var(--dim);margin:14px 0 14px;letter-spacing:.1em}
+.plan ul{list-style:none;font-size:14px}
+.plan li{padding:6px 0;border-top:1px solid var(--rule)}
+.plan.feature li{border-top-color:rgba(20,20,16,.12)}
+@media (max-width:680px){.plans{grid-template-columns:1fr}}
+.contact{margin-top:36px;font-size:14px;color:var(--dim);text-align:center}
+.contact b{display:block;margin-bottom:8px}
+
+/* coach */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:30px}
+.stat{padding:20px 18px;border-radius:2px;background:rgba(243,241,234,.03);box-shadow:0 0 0 1px var(--rule) inset}
+.stat .n{font-family:var(--display);font-weight:200;font-size:44px;line-height:1}
+.stat .l{font-size:12px;color:var(--dim);letter-spacing:.1em;margin-top:6px}
+@media (max-width:620px){.stats{grid-template-columns:1fr 1fr}}
+.form{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:20px}
+.form .w2{grid-column:span 2}.form .w4{grid-column:1/-1}
+@media (max-width:620px){.form{grid-template-columns:1fr 1fr}.form .w2,.form .w4{grid-column:1/-1}}
+label{display:block;font-size:12px;color:var(--dim);margin-bottom:4px;letter-spacing:.1em}
+input,select{font:inherit;font-size:15px;font-weight:400;width:100%;padding:9px 0;border:none;border-bottom:1px solid var(--rule);background:transparent;color:var(--bone);border-radius:0;color-scheme:dark}
+select option{background:var(--char)}
+input:focus,select:focus{outline:none;border-bottom-color:var(--bone)}
+input::placeholder{color:var(--faint)}
+.formact{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px}
+.roster{font-size:13px;color:var(--dim);margin-top:8px}
+.roster a{color:var(--needle);font-size:11px;margin-left:4px}
+.tbl{width:100%;border-collapse:collapse;font-size:14px;margin-top:6px}
+.tbl th{font-weight:400;font-size:11px;letter-spacing:.2em;color:var(--dim);text-align:left;padding:10px 8px 10px 0;border-bottom:1px solid var(--faint)}
+.tbl td{padding:10px 8px 10px 0;border-bottom:1px solid var(--rule);vertical-align:middle;font-weight:400}
+.tbl .left{font-family:var(--display);font-size:26px;font-weight:200}
+.tbl .low{color:var(--needle)}
+.tblwrap{overflow-x:auto}
+.link{font-family:var(--wide);font-stretch:112%;font-size:10.5px;font-weight:500;letter-spacing:.24em;border-bottom:1px solid var(--faint);padding-bottom:2px}
+.empty{padding:30px 0;color:var(--dim);border-bottom:1px solid var(--rule);font-size:14px}
+.notice{font-size:13px;color:var(--dim);padding:16px 0;border-bottom:1px solid var(--rule)}
+
+/* footer & nav */
+.end{text-align:center;padding:30px 0 60px}
+.end .word2{font-family:var(--wide);font-stretch:118%;font-weight:600;font-size:12px;letter-spacing:.42em;color:var(--bone)}
+nav.bottom{position:fixed;left:0;right:0;bottom:0;background:rgba(20,20,16,.92);backdrop-filter:blur(10px);border-top:1px solid var(--rule);display:flex;justify-content:center;z-index:9;padding-bottom:env(safe-area-inset-bottom)}
+nav.bottom a{flex:1;max-width:130px;text-align:center;padding:14px 0 16px;text-decoration:none;font-size:12px;color:var(--faint);letter-spacing:.18em;position:relative}
+nav.bottom a[aria-current="page"]{color:var(--bone)}
+nav.bottom a[aria-current="page"]::before{content:"";position:absolute;top:-1px;left:50%;width:16px;margin-left:-8px;height:1px;background:var(--needle)}
+.toast{position:fixed;left:50%;bottom:96px;transform:translate(-50%,8px);background:var(--bone);color:var(--ink);padding:11px 22px;border-radius:2px;font-size:13px;letter-spacing:.08em;opacity:0;transition:.25s;pointer-events:none;z-index:10;box-shadow:0 16px 40px rgba(0,0,0,.6)}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+@media (min-width:1061px){nav.bottom{display:none}body{padding-bottom:0}.toast{bottom:40px}}
+
+/* logo & FAYZE light */
+body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:20;opacity:.07;mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+.stage{background:#0C0C0A!important;min-height:92vh}
+.glow{position:absolute;left:50%;bottom:-6%;width:150%;height:70%;transform:translateX(-50%);pointer-events:none;
+  background:radial-gradient(50% 50% at 50% 50%,rgba(176,190,206,.42) 0%,rgba(110,124,142,.18) 38%,rgba(12,12,10,0) 70%);filter:blur(10px)}
+.stage::after{content:"";position:absolute;left:0;right:0;bottom:0;height:30%;background:linear-gradient(180deg,rgba(12,12,10,0),#0C0C0A);pointer-events:none}
+.mark-wrap{position:relative;color:var(--bone);width:min(200px,42vw);filter:drop-shadow(0 30px 50px rgba(0,0,0,.8))}
+.mark-wrap svg{display:block;width:100%;height:auto}
+.wm-wrap{position:relative;margin:34px 0 0;color:var(--bone);width:min(380px,64vw);font-size:0}
+.wm-wrap svg{display:block;width:100%;height:auto}
+.stage .kicker{margin:26px 0 0}
+@media (prefers-reduced-motion:no-preference){
+  .mark-wrap{animation:rise 1.6s cubic-bezier(.2,.8,.2,1) both}
+  .wm-wrap,.stage .kicker,#greet,.today-line{animation:fade 1.2s .7s both}
+  .glow{animation:dawn 2.4s ease-out both}
+}
+@keyframes rise{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+@keyframes dawn{from{opacity:0;transform:translateX(-50%) translateY(12%)}to{opacity:1}}
+.lockup{display:inline-flex;align-items:center;gap:10px;color:var(--bone)}
+.lockup .lk-m{height:24px;width:auto}
+.lockup .lk-w{height:17px;width:auto;margin-top:3px}
+.corner b{display:inline}
+.corner.r b{display:block}
+.end .lockup{justify-content:center}
+.end .lockup .lk-m{height:30px}.end .lockup .lk-w{height:21px}
+/* manifesto */
+.manifesto{max-width:1180px;margin:0 auto;padding:90px var(--pad) 70px}
+.manifesto .m{font-family:var(--wide);font-stretch:125%;font-weight:700;font-size:clamp(44px,10.5vw,138px);line-height:.92;letter-spacing:.01em;color:var(--bone)}
+.manifesto .m2{text-align:right}
+.manifesto .m3{padding-left:12%}
+.manifesto .cols{display:grid;grid-template-columns:repeat(3,1fr);gap:28px;margin-top:56px;max-width:860px;margin-left:auto}
+.manifesto .cols p{font-size:13px;line-height:1.8;color:var(--dim);border-top:1px solid var(--rule);padding-top:12px}
+.manifesto .cols b{display:block;font-family:var(--wide);font-stretch:112%;font-weight:600;font-size:10.5px;letter-spacing:.3em;text-transform:uppercase;color:var(--bone);margin-bottom:6px}
+@media (max-width:560px){.corner.r{display:none}}
+@media (max-width:620px){.manifesto .cols{grid-template-columns:1fr;gap:16px}.manifesto{padding:60px var(--pad) 40px}}
+.view{background:linear-gradient(180deg,#1C1D1F 0%,#121211 100%)}
+
+.bgphoto{position:absolute;inset:0;background:url(img/squat.jpg) center 62%/cover no-repeat;opacity:.38;
+  -webkit-mask-image:radial-gradient(70% 70% at 50% 55%,#000 30%,transparent 85%);mask-image:radial-gradient(70% 70% at 50% 55%,#000 30%,transparent 85%)}
+.pics{display:grid;grid-template-columns:1.1fr .9fr 1.2fr;gap:12px;margin-top:64px;align-items:end}
+.pics figure{position:relative;overflow:hidden;border-radius:2px;box-shadow:0 40px 80px -24px rgba(0,0,0,.85)}
+.pics img{display:block;width:100%;height:100%;object-fit:cover}
+.pics .p1{aspect-ratio:3/4.4}.pics .p2{aspect-ratio:3/4;margin-bottom:60px}.pics .p3{aspect-ratio:3/3.6}
+.pics figcaption{position:absolute;left:14px;bottom:12px;font-family:var(--wide);font-stretch:118%;font-weight:600;font-size:10.5px;letter-spacing:.32em;text-transform:uppercase;color:var(--bone)}
+@media (max-width:620px){.pics{grid-template-columns:1fr 1fr;gap:8px}.pics .p3{grid-column:1/-1;aspect-ratio:4/3}.pics .p2{margin-bottom:0}}
+.excl{font-family:var(--wide);font-stretch:112%;font-size:10px;font-weight:600;letter-spacing:.24em;color:var(--bone);margin-top:6px;display:inline-block;padding:3px 8px;box-shadow:inset 0 0 0 1px var(--faint)}
+.session+.session{margin-top:44px}
+
+/* booking sheet */
+.sheet{position:fixed;inset:0;z-index:30;display:flex;align-items:flex-end;justify-content:center}
+.sheet[hidden]{display:none}
+.sheet-bg{position:absolute;inset:0;background:rgba(6,6,5,.72);backdrop-filter:blur(6px)}
+.sheet-card{position:relative;width:min(460px,100%);background:linear-gradient(180deg,#232426,#161614);padding:30px 26px calc(26px + env(safe-area-inset-bottom));border-radius:4px 4px 0 0;box-shadow:0 -30px 80px rgba(0,0,0,.7)}
+@media (min-width:620px){.sheet{align-items:center}.sheet-card{border-radius:4px}}
+.sheet-x{position:absolute;top:14px;right:16px;font-size:24px;font-weight:200;color:var(--dim)}
+.sheet-h{font-family:var(--wide);font-stretch:118%;font-weight:700;font-size:24px;letter-spacing:.06em;margin-top:8px}
+.sheet-sub{color:var(--dim);font-size:14px;margin:6px 0 18px}
+.field{margin-top:14px}
+.field small{display:block;font-size:12px;color:var(--faint);margin-top:6px;line-height:1.6}
+.check{display:flex;gap:8px;align-items:center;font-size:13px;color:var(--dim);margin-top:18px;letter-spacing:.04em}
+.check input{width:auto;accent-color:var(--bone)}
+.sheet-err{min-height:22px;font-size:13px;color:#F08A6C;margin:12px 0 6px}
+.btn.wide{width:100%;padding:16px}
+/* me panel */
+.mebar{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:18px 0;border-bottom:1px solid var(--rule);flex-wrap:wrap}
+.mine-list{margin:4px 0 0}
+.mine-row{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--rule);font-size:14px}
+.mine-row b{font-family:var(--wide);font-stretch:112%;font-weight:600;letter-spacing:.1em;font-size:13px;margin-right:10px}
+.ghost{font-size:12px;color:var(--dim);border-bottom:1px solid var(--faint);padding-bottom:1px;letter-spacing:.06em}
+</style>
+</head>
+<body>
+<div class="stage">
+  <div class="bgphoto" aria-hidden="true"></div>
+  <div class="corner l"><span class="lockup"><svg class="lk-m" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 655 631"><path fill="currentColor" fill-rule="evenodd" d="M299.0,629.9C246.6,624.9 193.2,606.8 153.4,580.5C88.6,537.6 87.1,471.4 150.0,426.8C155.4,423.1 191.7,401.7 241.6,373.1C251.4,367.5 254.0,367.3 254.0,371.9C254.0,377.9 245.2,400.0 238.1,412.0C226.4,431.7 209.0,449.6 187.9,463.5C171.9,474.2 162.6,483.0 158.2,491.9C154.1,500.1 154.1,504.5 158.0,512.9C169.8,537.8 224.2,565.3 282.0,575.7C294.1,577.8 300.6,578.3 320.8,578.7C352.7,579.4 371.2,577.4 398.5,570.3C420.3,564.6 452.2,551.3 468.9,540.9C491.5,526.7 503.2,510.7 500.1,498.3C497.3,487.4 488.0,477.2 469.5,464.8C462.9,460.3 453.8,453.6 449.2,449.7C428.2,432.0 410.7,404.8 402.9,378.0C400.6,370.0 400.6,370.3 403.0,369.0C405.2,367.8 400.8,365.4 487.5,415.5C524.0,436.6 543.7,458.9 550.1,486.8C558.4,522.4 539.0,558.1 497.3,583.9C457.2,608.7 406.2,625.2 355.5,630.0C342.9,631.1 311.6,631.1 299.0,629.9ZM266.8,415.9C265.8,415.3 265.0,414.4 265.0,413.7C265.0,413.0 267.0,407.7 269.4,401.8C274.5,389.6 276.9,381.6 280.5,364.5C281.9,357.9 283.3,351.7 283.6,350.7C283.9,349.8 288.3,345.7 293.3,341.6C318.6,321.5 334.1,297.3 341.8,266.1L344.4,255.5L345.0,168.5C345.7,76.5 345.6,78.4 350.5,61.5C357.0,39.3 370.7,20.2 387.4,10.1C406.4,-1.3 432.8,-3.1 459.0,5.2C490.0,15.1 526.6,39.5 559.0,71.9C575.4,88.3 586.9,102.1 598.7,119.2C628.2,162.3 647.4,214.3 653.5,268.0C655.5,286.3 655.5,318.7 653.4,331.1C650.0,351.1 641.9,370.0 631.6,382.2C624.2,390.9 609.0,401.7 605.9,400.5C605.1,400.2 602.2,396.3 599.5,391.8C596.8,387.3 590.3,378.1 585.2,371.2C580.1,364.4 576.1,358.2 576.4,357.5C576.6,356.8 578.6,356.0 580.7,355.7C598.0,352.9 606.8,323.9 603.0,281.6C595.0,189.8 544.5,110.1 465.2,64.1C448.2,54.2 431.6,49.7 420.7,52.0C410.8,54.0 403.5,63.0 399.4,78.5C397.6,85.1 397.5,90.4 397.5,167.6L397.5,249.6L401.2,257.1C406.4,267.5 412.6,273.2 430.0,283.2C442.4,290.4 444.5,292.0 444.8,294.3C445.1,296.4 444.6,297.0 442.8,297.4C441.5,297.7 435.6,298.8 429.5,300.0C420.4,301.7 392.8,309.9 381.7,314.2C379.6,315.0 377.9,317.2 375.4,322.3C366.8,339.2 354.4,355.7 339.2,370.1C326.9,381.7 317.8,388.3 297.4,400.3C270.7,416.0 268.7,417.0 266.8,415.9ZM65.6,406.4C56.0,404.7 43.3,398.9 34.9,392.5C18.8,380.0 7.4,359.0 2.3,331.9C-0.1,319.0 -0.1,284.9 2.4,265.5C11.9,190.3 42.8,126.4 95.5,73.4C114.1,54.6 127.0,43.8 144.4,32.1C166.9,17.0 183.9,8.6 202.5,3.3C211.5,0.8 214.0,0.5 228.5,0.5C244.3,0.5 244.6,0.6 254.5,4.0C280.8,13.3 298.0,33.8 306.0,65.2C310.3,82.3 311.0,94.3 311.0,151.6C311.0,205.6 311.0,206.0 306.9,206.0C304.4,206.0 292.9,193.1 285.5,182.0C269.1,157.6 261.1,133.0 259.0,100.7C258.5,92.3 257.4,82.8 256.6,79.5C253.5,66.5 247.9,57.5 240.6,53.8C235.4,51.1 224.3,50.9 215.0,53.3C200.8,57.1 175.2,72.0 154.5,88.7C142.4,98.5 119.8,121.4 110.8,133.0C80.9,171.8 62.0,215.5 54.9,262.5C52.1,280.7 51.3,311.7 53.3,323.0C56.2,339.4 61.7,349.5 70.0,353.8C74.1,355.9 75.5,356.1 84.5,355.7C96.3,355.1 101.0,353.6 119.6,344.5C142.7,333.1 161.0,328.3 185.5,327.3C202.0,326.6 227.8,330.0 232.5,333.4C236.2,336.1 233.2,338.4 206.8,353.7C192.3,362.0 171.9,373.7 161.5,379.8C137.3,393.7 130.7,397.0 118.4,401.3C100.1,407.7 82.3,409.4 65.6,406.4ZM556.8,406.5C540.1,403.7 524.0,397.0 498.5,382.2C491.4,378.1 472.2,367.1 456.0,357.7C439.8,348.4 425.5,340.1 424.2,339.3C421.8,337.8 421.3,334.8 423.2,333.2C424.7,332.1 436.7,329.6 448.3,328.0C468.9,325.3 498.2,328.6 511.0,335.0C524.5,341.8 552.3,370.6 570.1,396.3C574.4,402.6 575.2,404.4 574.4,405.8C573.0,408.0 566.9,408.3 556.8,406.5Z"/></svg><svg class="lk-w" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 779 138"><path fill="currentColor" fill-rule="evenodd" d="M333.7,137.4C332.2,135.8 333.2,133.2 336.5,130.0C338.4,128.2 340.5,125.1 341.1,123.1C342.5,119.0 343.0,27.4 341.7,19.8C341.2,16.9 339.6,13.4 337.4,10.6C335.4,8.0 334.0,5.2 334.2,4.3C334.6,2.0 339.3,1.2 346.9,2.1C352.3,2.7 353.8,3.3 356.9,6.4C358.9,8.4 360.9,10.0 361.4,10.0C361.8,10.0 366.0,8.1 370.8,5.8C379.4,1.5 379.6,1.5 390.5,1.5C400.8,1.5 401.8,1.7 406.8,4.4C420.1,11.8 426.5,25.2 426.4,45.5C426.3,65.6 419.6,80.2 406.5,88.5C398.2,93.9 391.9,95.2 376.9,94.9C365.0,94.6 363.6,94.8 362.4,96.5C361.4,97.9 361.0,102.0 361.0,112.4C361.0,125.8 361.1,126.5 363.6,130.1C368.4,137.0 367.6,137.5 349.9,137.8C341.4,137.9 334.1,137.7 333.7,137.4ZM29.8,93.1C22.4,90.7 18.3,88.1 12.7,82.1C-3.2,65.1 -4.3,34.7 10.4,15.1C11.8,13.3 15.2,10.0 18.0,7.9C35.5,-5.2 68.9,-1.6 77.5,14.3C81.2,21.3 75.9,23.1 67.4,17.7C50.7,7.3 32.2,12.0 24.9,28.6C20.5,38.5 20.5,56.6 24.9,66.5C29.1,76.1 39.2,83.0 48.9,83.0C53.9,83.0 62.4,80.4 67.3,77.3C75.9,71.9 81.3,73.6 77.5,80.7C74.9,85.5 68.9,89.9 61.4,92.7C53.1,95.7 38.5,95.9 29.8,93.1ZM117.6,93.4C103.7,89.1 93.9,77.5 90.4,61.2C85.6,38.4 94.4,14.5 110.7,5.8C119.7,1.0 125.2,-0.2 135.8,0.2C147.3,0.7 154.4,3.1 162.0,9.1C181.9,24.8 184.9,62.9 167.6,81.7C158.1,92.2 150.7,95.0 133.6,94.9C126.8,94.9 120.6,94.3 117.6,93.4ZM182.7,93.5C182.3,92.7 183.9,89.9 186.5,86.9C192.1,80.3 192.3,79.2 192.4,46.5C192.5,18.2 192.1,16.0 186.9,9.4C185.3,7.4 184.0,4.9 184.0,3.8C184.0,1.1 188.4,-0.2 194.9,0.6C202.5,1.5 204.9,2.5 209.2,6.7L212.9,10.3L223.0,5.1C232.3,0.4 233.6,-0.0 240.1,0.0C248.2,0.0 252.3,1.5 259.7,7.0C262.6,9.2 265.6,11.0 266.5,11.0C267.4,11.0 271.1,9.2 274.8,7.0C283.2,1.9 287.7,0.6 296.5,0.5C302.1,0.5 304.6,1.0 308.4,3.0C320.0,9.0 321.7,15.0 322.5,53.0C322.9,67.6 323.3,80.4 323.5,81.5C323.8,82.6 325.5,85.3 327.5,87.4C329.4,89.6 331.0,92.2 331.0,93.2C331.0,94.9 329.8,95.0 315.1,95.0C303.3,95.0 299.1,94.7 298.7,93.8C298.5,93.1 299.4,90.3 300.8,87.5L303.2,82.6L302.8,55.0C302.4,29.0 302.3,27.3 300.1,23.2C296.9,17.0 292.9,14.8 285.7,15.3C279.0,15.7 272.8,19.4 269.5,25.0C267.6,28.3 267.5,30.1 267.5,55.7L267.5,82.9L271.8,87.2C279.1,94.8 278.7,95.0 258.0,95.0C236.8,95.0 236.0,94.6 243.1,87.4L247.5,82.9L247.5,55.7C247.5,30.0 247.4,28.3 245.3,23.8C242.5,17.7 240.4,16.7 231.4,17.2C225.1,17.5 223.6,17.9 220.3,20.6C218.2,22.2 215.5,25.7 214.2,28.2C211.9,32.7 211.8,33.9 211.7,58.2L211.5,83.5L214.7,87.8C219.8,94.7 219.3,95.0 200.0,95.0C186.2,95.0 183.1,94.7 182.7,93.5ZM447.6,93.0C438.7,88.5 434.5,80.7 435.2,70.0C435.5,66.4 436.4,62.1 437.3,60.3C441.4,52.4 450.8,46.6 465.5,43.1C470.4,41.9 476.6,40.4 479.2,39.8C482.1,39.1 485.1,37.5 486.7,35.8C489.0,33.4 489.4,32.1 489.4,27.7C489.2,18.0 484.1,12.3 474.7,11.3C467.7,10.6 464.2,12.4 458.4,20.0C453.9,25.8 449.6,28.5 445.6,28.2C442.3,28.0 439.0,23.4 439.0,19.2C439.0,7.5 455.3,-0.6 477.2,0.2C489.4,0.6 496.9,3.4 501.4,9.3C506.3,15.7 507.1,21.2 507.9,50.1C508.6,80.2 508.4,79.5 516.6,82.6C521.5,84.5 521.9,85.6 518.9,89.4C516.1,93.0 510.9,95.0 504.3,95.0C499.3,95.0 498.6,94.7 493.9,90.4L489.0,85.7L481.9,89.0C471.6,93.7 466.6,95.0 458.6,95.0C453.6,94.9 450.3,94.3 447.6,93.0ZM540.8,93.2C537.1,92.2 533.2,90.6 532.0,89.5C529.6,87.3 528.0,82.0 528.0,75.8C528.0,69.9 529.7,66.1 532.7,65.4C535.6,64.6 537.2,65.9 542.0,73.0C548.6,82.6 552.7,85.0 562.7,85.0C572.5,85.0 579.0,80.3 579.0,73.1C579.0,65.8 576.4,63.6 558.5,55.0C547.7,49.8 540.5,45.7 537.6,43.0C523.5,30.0 529.9,7.5 549.4,1.5C556.7,-0.7 571.3,-0.5 579.4,2.0C591.0,5.6 595.5,11.8 593.0,21.0C591.8,25.3 589.1,27.5 586.0,26.5C584.9,26.2 582.2,23.2 579.9,20.0C574.7,12.6 572.2,10.9 565.0,10.3C554.3,9.3 548.0,13.4 548.0,21.4C548.0,27.4 552.0,30.8 566.9,37.5C573.7,40.5 581.2,44.1 583.5,45.5C589.3,48.8 595.8,56.4 596.6,60.7C597.6,65.9 596.5,77.1 594.7,80.5C592.3,85.1 587.0,90.1 582.0,92.4C575.6,95.4 550.7,95.8 540.8,93.2ZM622.2,93.5C610.9,90.3 608.8,87.6 608.7,75.3C608.6,70.1 609.0,68.5 610.7,66.8C614.2,63.4 617.2,65.0 622.7,73.2C628.9,82.3 633.4,85.0 642.9,85.0C651.3,85.0 655.8,82.8 658.4,77.7C662.6,69.0 657.7,63.2 639.4,55.1C625.3,48.9 617.6,43.9 614.2,38.7C610.5,33.1 609.8,21.3 612.9,15.3C617.9,5.5 628.7,-0.0 643.1,-0.0C657.9,-0.0 669.3,3.9 672.5,10.0C676.0,16.7 672.8,27.6 667.7,26.8C666.6,26.6 663.6,23.8 661.1,20.6C654.5,12.2 652.1,10.7 644.6,10.2C637.0,9.7 631.7,11.8 629.5,16.1C625.6,23.6 628.9,28.6 641.8,34.7C647.1,37.2 654.6,40.7 658.5,42.5C675.5,50.6 681.1,61.3 676.4,76.9C674.5,83.4 667.2,91.2 661.4,93.1C655.4,95.0 628.6,95.3 622.2,93.5ZM717.6,93.4C710.9,91.3 706.3,88.2 700.4,81.7C685.0,64.9 685.4,31.5 701.1,13.6C714.4,-1.4 739.7,-4.6 758.6,6.5C774.0,15.5 782.3,39.2 777.6,61.0C775.5,70.5 772.7,76.4 767.3,82.1C757.9,92.2 750.5,95.0 733.6,94.9C726.8,94.9 720.6,94.3 717.6,93.4ZM145.2,81.4C153.7,75.5 156.9,67.5 157.7,50.5C158.3,37.5 157.1,29.6 153.2,22.0C149.3,14.3 144.0,10.7 135.5,10.2C119.9,9.2 111.3,19.9 110.3,42.1C108.9,69.9 118.1,85.7 135.3,84.7C139.7,84.4 142.0,83.7 145.2,81.4ZM742.6,82.9C752.2,78.3 756.8,68.8 757.7,52.0C758.7,32.7 754.8,19.6 746.2,13.6C742.8,11.2 740.7,10.5 735.5,10.2C718.9,9.1 710.0,21.9 710.0,47.0C710.0,66.6 715.5,78.8 726.5,83.6C731.0,85.6 737.8,85.3 742.6,82.9ZM391.8,81.1C399.3,77.3 403.5,70.0 405.2,58.0C407.6,41.5 403.2,24.5 394.7,17.6C391.1,14.7 390.2,14.5 383.2,14.5C376.1,14.5 375.1,14.8 370.4,17.9C361.6,23.7 361.5,24.1 361.5,50.2C361.5,76.0 361.6,76.5 370.0,80.8C375.8,83.7 386.4,83.9 391.8,81.1ZM477.6,79.9C480.1,78.7 483.6,76.3 485.5,74.5L489.0,71.3L489.0,61.2C489.0,49.8 489.1,50.0 480.6,50.0C469.9,50.0 460.2,54.9 456.4,62.2C455.6,63.8 454.9,67.4 454.8,70.2C454.8,76.5 457.2,80.0 462.6,81.7C467.5,83.2 471.9,82.7 477.6,79.9Z"/></svg></span><div class="micro" style="margin-top:10px">Hybrid Training Hub</div></div>
+  <div class="corner r micro">Taoyuan<b>Wed · Fri · Sat</b></div>
+  <div class="glow" aria-hidden="true"></div>
+  <div class="mark-wrap"><svg class="mk" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 655 631"><path fill="currentColor" fill-rule="evenodd" d="M299.0,629.9C246.6,624.9 193.2,606.8 153.4,580.5C88.6,537.6 87.1,471.4 150.0,426.8C155.4,423.1 191.7,401.7 241.6,373.1C251.4,367.5 254.0,367.3 254.0,371.9C254.0,377.9 245.2,400.0 238.1,412.0C226.4,431.7 209.0,449.6 187.9,463.5C171.9,474.2 162.6,483.0 158.2,491.9C154.1,500.1 154.1,504.5 158.0,512.9C169.8,537.8 224.2,565.3 282.0,575.7C294.1,577.8 300.6,578.3 320.8,578.7C352.7,579.4 371.2,577.4 398.5,570.3C420.3,564.6 452.2,551.3 468.9,540.9C491.5,526.7 503.2,510.7 500.1,498.3C497.3,487.4 488.0,477.2 469.5,464.8C462.9,460.3 453.8,453.6 449.2,449.7C428.2,432.0 410.7,404.8 402.9,378.0C400.6,370.0 400.6,370.3 403.0,369.0C405.2,367.8 400.8,365.4 487.5,415.5C524.0,436.6 543.7,458.9 550.1,486.8C558.4,522.4 539.0,558.1 497.3,583.9C457.2,608.7 406.2,625.2 355.5,630.0C342.9,631.1 311.6,631.1 299.0,629.9ZM266.8,415.9C265.8,415.3 265.0,414.4 265.0,413.7C265.0,413.0 267.0,407.7 269.4,401.8C274.5,389.6 276.9,381.6 280.5,364.5C281.9,357.9 283.3,351.7 283.6,350.7C283.9,349.8 288.3,345.7 293.3,341.6C318.6,321.5 334.1,297.3 341.8,266.1L344.4,255.5L345.0,168.5C345.7,76.5 345.6,78.4 350.5,61.5C357.0,39.3 370.7,20.2 387.4,10.1C406.4,-1.3 432.8,-3.1 459.0,5.2C490.0,15.1 526.6,39.5 559.0,71.9C575.4,88.3 586.9,102.1 598.7,119.2C628.2,162.3 647.4,214.3 653.5,268.0C655.5,286.3 655.5,318.7 653.4,331.1C650.0,351.1 641.9,370.0 631.6,382.2C624.2,390.9 609.0,401.7 605.9,400.5C605.1,400.2 602.2,396.3 599.5,391.8C596.8,387.3 590.3,378.1 585.2,371.2C580.1,364.4 576.1,358.2 576.4,357.5C576.6,356.8 578.6,356.0 580.7,355.7C598.0,352.9 606.8,323.9 603.0,281.6C595.0,189.8 544.5,110.1 465.2,64.1C448.2,54.2 431.6,49.7 420.7,52.0C410.8,54.0 403.5,63.0 399.4,78.5C397.6,85.1 397.5,90.4 397.5,167.6L397.5,249.6L401.2,257.1C406.4,267.5 412.6,273.2 430.0,283.2C442.4,290.4 444.5,292.0 444.8,294.3C445.1,296.4 444.6,297.0 442.8,297.4C441.5,297.7 435.6,298.8 429.5,300.0C420.4,301.7 392.8,309.9 381.7,314.2C379.6,315.0 377.9,317.2 375.4,322.3C366.8,339.2 354.4,355.7 339.2,370.1C326.9,381.7 317.8,388.3 297.4,400.3C270.7,416.0 268.7,417.0 266.8,415.9ZM65.6,406.4C56.0,404.7 43.3,398.9 34.9,392.5C18.8,380.0 7.4,359.0 2.3,331.9C-0.1,319.0 -0.1,284.9 2.4,265.5C11.9,190.3 42.8,126.4 95.5,73.4C114.1,54.6 127.0,43.8 144.4,32.1C166.9,17.0 183.9,8.6 202.5,3.3C211.5,0.8 214.0,0.5 228.5,0.5C244.3,0.5 244.6,0.6 254.5,4.0C280.8,13.3 298.0,33.8 306.0,65.2C310.3,82.3 311.0,94.3 311.0,151.6C311.0,205.6 311.0,206.0 306.9,206.0C304.4,206.0 292.9,193.1 285.5,182.0C269.1,157.6 261.1,133.0 259.0,100.7C258.5,92.3 257.4,82.8 256.6,79.5C253.5,66.5 247.9,57.5 240.6,53.8C235.4,51.1 224.3,50.9 215.0,53.3C200.8,57.1 175.2,72.0 154.5,88.7C142.4,98.5 119.8,121.4 110.8,133.0C80.9,171.8 62.0,215.5 54.9,262.5C52.1,280.7 51.3,311.7 53.3,323.0C56.2,339.4 61.7,349.5 70.0,353.8C74.1,355.9 75.5,356.1 84.5,355.7C96.3,355.1 101.0,353.6 119.6,344.5C142.7,333.1 161.0,328.3 185.5,327.3C202.0,326.6 227.8,330.0 232.5,333.4C236.2,336.1 233.2,338.4 206.8,353.7C192.3,362.0 171.9,373.7 161.5,379.8C137.3,393.7 130.7,397.0 118.4,401.3C100.1,407.7 82.3,409.4 65.6,406.4ZM556.8,406.5C540.1,403.7 524.0,397.0 498.5,382.2C491.4,378.1 472.2,367.1 456.0,357.7C439.8,348.4 425.5,340.1 424.2,339.3C421.8,337.8 421.3,334.8 423.2,333.2C424.7,332.1 436.7,329.6 448.3,328.0C468.9,325.3 498.2,328.6 511.0,335.0C524.5,341.8 552.3,370.6 570.1,396.3C574.4,402.6 575.2,404.4 574.4,405.8C573.0,408.0 566.9,408.3 556.8,406.5Z"/></svg></div>
+  <h1 class="wm-wrap"><svg class="wm" role="img" aria-label="compasso" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 779 138"><path fill="currentColor" fill-rule="evenodd" d="M333.7,137.4C332.2,135.8 333.2,133.2 336.5,130.0C338.4,128.2 340.5,125.1 341.1,123.1C342.5,119.0 343.0,27.4 341.7,19.8C341.2,16.9 339.6,13.4 337.4,10.6C335.4,8.0 334.0,5.2 334.2,4.3C334.6,2.0 339.3,1.2 346.9,2.1C352.3,2.7 353.8,3.3 356.9,6.4C358.9,8.4 360.9,10.0 361.4,10.0C361.8,10.0 366.0,8.1 370.8,5.8C379.4,1.5 379.6,1.5 390.5,1.5C400.8,1.5 401.8,1.7 406.8,4.4C420.1,11.8 426.5,25.2 426.4,45.5C426.3,65.6 419.6,80.2 406.5,88.5C398.2,93.9 391.9,95.2 376.9,94.9C365.0,94.6 363.6,94.8 362.4,96.5C361.4,97.9 361.0,102.0 361.0,112.4C361.0,125.8 361.1,126.5 363.6,130.1C368.4,137.0 367.6,137.5 349.9,137.8C341.4,137.9 334.1,137.7 333.7,137.4ZM29.8,93.1C22.4,90.7 18.3,88.1 12.7,82.1C-3.2,65.1 -4.3,34.7 10.4,15.1C11.8,13.3 15.2,10.0 18.0,7.9C35.5,-5.2 68.9,-1.6 77.5,14.3C81.2,21.3 75.9,23.1 67.4,17.7C50.7,7.3 32.2,12.0 24.9,28.6C20.5,38.5 20.5,56.6 24.9,66.5C29.1,76.1 39.2,83.0 48.9,83.0C53.9,83.0 62.4,80.4 67.3,77.3C75.9,71.9 81.3,73.6 77.5,80.7C74.9,85.5 68.9,89.9 61.4,92.7C53.1,95.7 38.5,95.9 29.8,93.1ZM117.6,93.4C103.7,89.1 93.9,77.5 90.4,61.2C85.6,38.4 94.4,14.5 110.7,5.8C119.7,1.0 125.2,-0.2 135.8,0.2C147.3,0.7 154.4,3.1 162.0,9.1C181.9,24.8 184.9,62.9 167.6,81.7C158.1,92.2 150.7,95.0 133.6,94.9C126.8,94.9 120.6,94.3 117.6,93.4ZM182.7,93.5C182.3,92.7 183.9,89.9 186.5,86.9C192.1,80.3 192.3,79.2 192.4,46.5C192.5,18.2 192.1,16.0 186.9,9.4C185.3,7.4 184.0,4.9 184.0,3.8C184.0,1.1 188.4,-0.2 194.9,0.6C202.5,1.5 204.9,2.5 209.2,6.7L212.9,10.3L223.0,5.1C232.3,0.4 233.6,-0.0 240.1,0.0C248.2,0.0 252.3,1.5 259.7,7.0C262.6,9.2 265.6,11.0 266.5,11.0C267.4,11.0 271.1,9.2 274.8,7.0C283.2,1.9 287.7,0.6 296.5,0.5C302.1,0.5 304.6,1.0 308.4,3.0C320.0,9.0 321.7,15.0 322.5,53.0C322.9,67.6 323.3,80.4 323.5,81.5C323.8,82.6 325.5,85.3 327.5,87.4C329.4,89.6 331.0,92.2 331.0,93.2C331.0,94.9 329.8,95.0 315.1,95.0C303.3,95.0 299.1,94.7 298.7,93.8C298.5,93.1 299.4,90.3 300.8,87.5L303.2,82.6L302.8,55.0C302.4,29.0 302.3,27.3 300.1,23.2C296.9,17.0 292.9,14.8 285.7,15.3C279.0,15.7 272.8,19.4 269.5,25.0C267.6,28.3 267.5,30.1 267.5,55.7L267.5,82.9L271.8,87.2C279.1,94.8 278.7,95.0 258.0,95.0C236.8,95.0 236.0,94.6 243.1,87.4L247.5,82.9L247.5,55.7C247.5,30.0 247.4,28.3 245.3,23.8C242.5,17.7 240.4,16.7 231.4,17.2C225.1,17.5 223.6,17.9 220.3,20.6C218.2,22.2 215.5,25.7 214.2,28.2C211.9,32.7 211.8,33.9 211.7,58.2L211.5,83.5L214.7,87.8C219.8,94.7 219.3,95.0 200.0,95.0C186.2,95.0 183.1,94.7 182.7,93.5ZM447.6,93.0C438.7,88.5 434.5,80.7 435.2,70.0C435.5,66.4 436.4,62.1 437.3,60.3C441.4,52.4 450.8,46.6 465.5,43.1C470.4,41.9 476.6,40.4 479.2,39.8C482.1,39.1 485.1,37.5 486.7,35.8C489.0,33.4 489.4,32.1 489.4,27.7C489.2,18.0 484.1,12.3 474.7,11.3C467.7,10.6 464.2,12.4 458.4,20.0C453.9,25.8 449.6,28.5 445.6,28.2C442.3,28.0 439.0,23.4 439.0,19.2C439.0,7.5 455.3,-0.6 477.2,0.2C489.4,0.6 496.9,3.4 501.4,9.3C506.3,15.7 507.1,21.2 507.9,50.1C508.6,80.2 508.4,79.5 516.6,82.6C521.5,84.5 521.9,85.6 518.9,89.4C516.1,93.0 510.9,95.0 504.3,95.0C499.3,95.0 498.6,94.7 493.9,90.4L489.0,85.7L481.9,89.0C471.6,93.7 466.6,95.0 458.6,95.0C453.6,94.9 450.3,94.3 447.6,93.0ZM540.8,93.2C537.1,92.2 533.2,90.6 532.0,89.5C529.6,87.3 528.0,82.0 528.0,75.8C528.0,69.9 529.7,66.1 532.7,65.4C535.6,64.6 537.2,65.9 542.0,73.0C548.6,82.6 552.7,85.0 562.7,85.0C572.5,85.0 579.0,80.3 579.0,73.1C579.0,65.8 576.4,63.6 558.5,55.0C547.7,49.8 540.5,45.7 537.6,43.0C523.5,30.0 529.9,7.5 549.4,1.5C556.7,-0.7 571.3,-0.5 579.4,2.0C591.0,5.6 595.5,11.8 593.0,21.0C591.8,25.3 589.1,27.5 586.0,26.5C584.9,26.2 582.2,23.2 579.9,20.0C574.7,12.6 572.2,10.9 565.0,10.3C554.3,9.3 548.0,13.4 548.0,21.4C548.0,27.4 552.0,30.8 566.9,37.5C573.7,40.5 581.2,44.1 583.5,45.5C589.3,48.8 595.8,56.4 596.6,60.7C597.6,65.9 596.5,77.1 594.7,80.5C592.3,85.1 587.0,90.1 582.0,92.4C575.6,95.4 550.7,95.8 540.8,93.2ZM622.2,93.5C610.9,90.3 608.8,87.6 608.7,75.3C608.6,70.1 609.0,68.5 610.7,66.8C614.2,63.4 617.2,65.0 622.7,73.2C628.9,82.3 633.4,85.0 642.9,85.0C651.3,85.0 655.8,82.8 658.4,77.7C662.6,69.0 657.7,63.2 639.4,55.1C625.3,48.9 617.6,43.9 614.2,38.7C610.5,33.1 609.8,21.3 612.9,15.3C617.9,5.5 628.7,-0.0 643.1,-0.0C657.9,-0.0 669.3,3.9 672.5,10.0C676.0,16.7 672.8,27.6 667.7,26.8C666.6,26.6 663.6,23.8 661.1,20.6C654.5,12.2 652.1,10.7 644.6,10.2C637.0,9.7 631.7,11.8 629.5,16.1C625.6,23.6 628.9,28.6 641.8,34.7C647.1,37.2 654.6,40.7 658.5,42.5C675.5,50.6 681.1,61.3 676.4,76.9C674.5,83.4 667.2,91.2 661.4,93.1C655.4,95.0 628.6,95.3 622.2,93.5ZM717.6,93.4C710.9,91.3 706.3,88.2 700.4,81.7C685.0,64.9 685.4,31.5 701.1,13.6C714.4,-1.4 739.7,-4.6 758.6,6.5C774.0,15.5 782.3,39.2 777.6,61.0C775.5,70.5 772.7,76.4 767.3,82.1C757.9,92.2 750.5,95.0 733.6,94.9C726.8,94.9 720.6,94.3 717.6,93.4ZM145.2,81.4C153.7,75.5 156.9,67.5 157.7,50.5C158.3,37.5 157.1,29.6 153.2,22.0C149.3,14.3 144.0,10.7 135.5,10.2C119.9,9.2 111.3,19.9 110.3,42.1C108.9,69.9 118.1,85.7 135.3,84.7C139.7,84.4 142.0,83.7 145.2,81.4ZM742.6,82.9C752.2,78.3 756.8,68.8 757.7,52.0C758.7,32.7 754.8,19.6 746.2,13.6C742.8,11.2 740.7,10.5 735.5,10.2C718.9,9.1 710.0,21.9 710.0,47.0C710.0,66.6 715.5,78.8 726.5,83.6C731.0,85.6 737.8,85.3 742.6,82.9ZM391.8,81.1C399.3,77.3 403.5,70.0 405.2,58.0C407.6,41.5 403.2,24.5 394.7,17.6C391.1,14.7 390.2,14.5 383.2,14.5C376.1,14.5 375.1,14.8 370.4,17.9C361.6,23.7 361.5,24.1 361.5,50.2C361.5,76.0 361.6,76.5 370.0,80.8C375.8,83.7 386.4,83.9 391.8,81.1ZM477.6,79.9C480.1,78.7 483.6,76.3 485.5,74.5L489.0,71.3L489.0,61.2C489.0,49.8 489.1,50.0 480.6,50.0C469.9,50.0 460.2,54.9 456.4,62.2C455.6,63.8 454.9,67.4 454.8,70.2C454.8,76.5 457.2,80.0 462.6,81.7C467.5,83.2 471.9,82.7 477.6,79.9Z"/></svg></h1>
+  <div class="kicker micro">Movement has a direction</div>
+  <p id="greet">每週三、五、六，一起出發。</p>
+  <div class="today-line" id="todayLine"></div>
+</div>
+<section class="manifesto" aria-label="COMPASSO">
+  <div class="m m1">TRAIN</div>
+  <div class="m m2">WITH A</div>
+  <div class="m m3">DIRECTION.</div>
+  <div class="pics">
+    <figure class="p1"><img src="img/run.jpg" alt="COMPASSO 會員在跑步機上同步配速" loading="lazy"><figcaption>Engine</figcaption></figure>
+    <figure class="p2"><img src="img/rope.jpg" alt="會員坐姿拉繩，背景是 COMPASSO 旗幟" loading="lazy"><figcaption>Force</figcaption></figure>
+    <figure class="p3"><img src="img/wall.jpg" alt="兩位會員在 COMPASSO 旗幟前做牆球" loading="lazy"><figcaption>Form</figcaption></figure>
+  </div>
+  <div class="cols">
+    <p><b>Group</b>週三、六 07:30 COMPASSO 專屬團課<br>週五 19:00、週六 09:00 團課</p>
+    <p><b>Program</b>固定週課表<br>團課以外的日子以跑步為主</p>
+    <p><b>Standard</b>八個站點的動作標準<br>教練提示與常見錯誤</p>
+  </div>
+</section>
+<nav class="rail" aria-label="區塊">
+  <a href="#classes" data-nav="classes"><i></i>.01 <span>團課</span></a>
+  <a href="#program" data-nav="program"><i></i>.02 <span>課表</span></a>
+  <a href="#library" data-nav="library"><i></i>.03 <span>動作</span></a>
+  <a href="#plans" data-nav="plans"><i></i>.04 <span>方案</span></a>
+</nav>
+
+<main>
+  <!-- CLASSES (default) -->
+  <section class="view" data-view="classes" data-i=".01">
+    <h2 class="h">GROUP SESSIONS<small>團課</small></h2>
+    <p class="intro">COMPASSO 專屬團課在週三、週六 07:30–09:00，另有週五 19:00–20:00 與週六 09:00–10:00 團課。名額即時更新，取消後位子會立刻釋出。</p>
+    <div id="me"></div>
+    <div id="dbStatus"></div>
+    <div class="sub"><h3>即將開課</h3><span id="upCount"></span></div>
+    <div id="classList"></div>
+  </section>
+
+  <!-- PROGRAM -->
+  <section class="view hidden" data-view="program" data-i=".02">
+    <h2 class="h">PROGRAM<small>本週課表</small></h2>
+    <p class="intro">固定週課表。團課之外的日子安排跑步，一週選 3 到 5 天參加就好，不必每天練。</p>
+    <div class="week" id="week"></div>
+    <div class="legend"><i></i>有團課的日子，需先預約</div>
+    <div id="dayDetail"></div>
+  </section>
+
+  <!-- LIBRARY -->
+  <section class="view hidden" data-view="library" data-i=".03">
+    <h2 class="h">MOVEMENTS<small>動作庫</small></h2>
+    <p class="intro">八個比賽站點與跑步。點開看教練提示與常見錯誤。</p>
+    <div id="library"></div>
+    <p class="fine">比賽距離與重量為 HYROX Open 組公開規則，每季可能調整，以官方最新公告為準。</p>
+  </section>
+
+  <!-- PLANS -->
+  <section class="view hidden" data-view="plans" data-i=".04">
+    <h2 class="h">MEMBERSHIP<small>方案</small></h2>
+    <p class="intro">從每日課表開始，需要更多時再加上。目前價格未定，付款確認後由教練開通。</p>
+    <div id="plans" class="plans"></div>
+    <div class="contact"><b>加入或詢問</b>電話 0911-236-909<br>compassotw@gmail.com<br>桃園市桃園區中山路 709 號 6 樓</div>
+  </section>
+
+</main>
+
+<div class="end"><span class="lockup end-lk"><svg class="lk-m" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 655 631"><path fill="currentColor" fill-rule="evenodd" d="M299.0,629.9C246.6,624.9 193.2,606.8 153.4,580.5C88.6,537.6 87.1,471.4 150.0,426.8C155.4,423.1 191.7,401.7 241.6,373.1C251.4,367.5 254.0,367.3 254.0,371.9C254.0,377.9 245.2,400.0 238.1,412.0C226.4,431.7 209.0,449.6 187.9,463.5C171.9,474.2 162.6,483.0 158.2,491.9C154.1,500.1 154.1,504.5 158.0,512.9C169.8,537.8 224.2,565.3 282.0,575.7C294.1,577.8 300.6,578.3 320.8,578.7C352.7,579.4 371.2,577.4 398.5,570.3C420.3,564.6 452.2,551.3 468.9,540.9C491.5,526.7 503.2,510.7 500.1,498.3C497.3,487.4 488.0,477.2 469.5,464.8C462.9,460.3 453.8,453.6 449.2,449.7C428.2,432.0 410.7,404.8 402.9,378.0C400.6,370.0 400.6,370.3 403.0,369.0C405.2,367.8 400.8,365.4 487.5,415.5C524.0,436.6 543.7,458.9 550.1,486.8C558.4,522.4 539.0,558.1 497.3,583.9C457.2,608.7 406.2,625.2 355.5,630.0C342.9,631.1 311.6,631.1 299.0,629.9ZM266.8,415.9C265.8,415.3 265.0,414.4 265.0,413.7C265.0,413.0 267.0,407.7 269.4,401.8C274.5,389.6 276.9,381.6 280.5,364.5C281.9,357.9 283.3,351.7 283.6,350.7C283.9,349.8 288.3,345.7 293.3,341.6C318.6,321.5 334.1,297.3 341.8,266.1L344.4,255.5L345.0,168.5C345.7,76.5 345.6,78.4 350.5,61.5C357.0,39.3 370.7,20.2 387.4,10.1C406.4,-1.3 432.8,-3.1 459.0,5.2C490.0,15.1 526.6,39.5 559.0,71.9C575.4,88.3 586.9,102.1 598.7,119.2C628.2,162.3 647.4,214.3 653.5,268.0C655.5,286.3 655.5,318.7 653.4,331.1C650.0,351.1 641.9,370.0 631.6,382.2C624.2,390.9 609.0,401.7 605.9,400.5C605.1,400.2 602.2,396.3 599.5,391.8C596.8,387.3 590.3,378.1 585.2,371.2C580.1,364.4 576.1,358.2 576.4,357.5C576.6,356.8 578.6,356.0 580.7,355.7C598.0,352.9 606.8,323.9 603.0,281.6C595.0,189.8 544.5,110.1 465.2,64.1C448.2,54.2 431.6,49.7 420.7,52.0C410.8,54.0 403.5,63.0 399.4,78.5C397.6,85.1 397.5,90.4 397.5,167.6L397.5,249.6L401.2,257.1C406.4,267.5 412.6,273.2 430.0,283.2C442.4,290.4 444.5,292.0 444.8,294.3C445.1,296.4 444.6,297.0 442.8,297.4C441.5,297.7 435.6,298.8 429.5,300.0C420.4,301.7 392.8,309.9 381.7,314.2C379.6,315.0 377.9,317.2 375.4,322.3C366.8,339.2 354.4,355.7 339.2,370.1C326.9,381.7 317.8,388.3 297.4,400.3C270.7,416.0 268.7,417.0 266.8,415.9ZM65.6,406.4C56.0,404.7 43.3,398.9 34.9,392.5C18.8,380.0 7.4,359.0 2.3,331.9C-0.1,319.0 -0.1,284.9 2.4,265.5C11.9,190.3 42.8,126.4 95.5,73.4C114.1,54.6 127.0,43.8 144.4,32.1C166.9,17.0 183.9,8.6 202.5,3.3C211.5,0.8 214.0,0.5 228.5,0.5C244.3,0.5 244.6,0.6 254.5,4.0C280.8,13.3 298.0,33.8 306.0,65.2C310.3,82.3 311.0,94.3 311.0,151.6C311.0,205.6 311.0,206.0 306.9,206.0C304.4,206.0 292.9,193.1 285.5,182.0C269.1,157.6 261.1,133.0 259.0,100.7C258.5,92.3 257.4,82.8 256.6,79.5C253.5,66.5 247.9,57.5 240.6,53.8C235.4,51.1 224.3,50.9 215.0,53.3C200.8,57.1 175.2,72.0 154.5,88.7C142.4,98.5 119.8,121.4 110.8,133.0C80.9,171.8 62.0,215.5 54.9,262.5C52.1,280.7 51.3,311.7 53.3,323.0C56.2,339.4 61.7,349.5 70.0,353.8C74.1,355.9 75.5,356.1 84.5,355.7C96.3,355.1 101.0,353.6 119.6,344.5C142.7,333.1 161.0,328.3 185.5,327.3C202.0,326.6 227.8,330.0 232.5,333.4C236.2,336.1 233.2,338.4 206.8,353.7C192.3,362.0 171.9,373.7 161.5,379.8C137.3,393.7 130.7,397.0 118.4,401.3C100.1,407.7 82.3,409.4 65.6,406.4ZM556.8,406.5C540.1,403.7 524.0,397.0 498.5,382.2C491.4,378.1 472.2,367.1 456.0,357.7C439.8,348.4 425.5,340.1 424.2,339.3C421.8,337.8 421.3,334.8 423.2,333.2C424.7,332.1 436.7,329.6 448.3,328.0C468.9,325.3 498.2,328.6 511.0,335.0C524.5,341.8 552.3,370.6 570.1,396.3C574.4,402.6 575.2,404.4 574.4,405.8C573.0,408.0 566.9,408.3 556.8,406.5Z"/></svg><svg class="lk-w" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 779 138"><path fill="currentColor" fill-rule="evenodd" d="M333.7,137.4C332.2,135.8 333.2,133.2 336.5,130.0C338.4,128.2 340.5,125.1 341.1,123.1C342.5,119.0 343.0,27.4 341.7,19.8C341.2,16.9 339.6,13.4 337.4,10.6C335.4,8.0 334.0,5.2 334.2,4.3C334.6,2.0 339.3,1.2 346.9,2.1C352.3,2.7 353.8,3.3 356.9,6.4C358.9,8.4 360.9,10.0 361.4,10.0C361.8,10.0 366.0,8.1 370.8,5.8C379.4,1.5 379.6,1.5 390.5,1.5C400.8,1.5 401.8,1.7 406.8,4.4C420.1,11.8 426.5,25.2 426.4,45.5C426.3,65.6 419.6,80.2 406.5,88.5C398.2,93.9 391.9,95.2 376.9,94.9C365.0,94.6 363.6,94.8 362.4,96.5C361.4,97.9 361.0,102.0 361.0,112.4C361.0,125.8 361.1,126.5 363.6,130.1C368.4,137.0 367.6,137.5 349.9,137.8C341.4,137.9 334.1,137.7 333.7,137.4ZM29.8,93.1C22.4,90.7 18.3,88.1 12.7,82.1C-3.2,65.1 -4.3,34.7 10.4,15.1C11.8,13.3 15.2,10.0 18.0,7.9C35.5,-5.2 68.9,-1.6 77.5,14.3C81.2,21.3 75.9,23.1 67.4,17.7C50.7,7.3 32.2,12.0 24.9,28.6C20.5,38.5 20.5,56.6 24.9,66.5C29.1,76.1 39.2,83.0 48.9,83.0C53.9,83.0 62.4,80.4 67.3,77.3C75.9,71.9 81.3,73.6 77.5,80.7C74.9,85.5 68.9,89.9 61.4,92.7C53.1,95.7 38.5,95.9 29.8,93.1ZM117.6,93.4C103.7,89.1 93.9,77.5 90.4,61.2C85.6,38.4 94.4,14.5 110.7,5.8C119.7,1.0 125.2,-0.2 135.8,0.2C147.3,0.7 154.4,3.1 162.0,9.1C181.9,24.8 184.9,62.9 167.6,81.7C158.1,92.2 150.7,95.0 133.6,94.9C126.8,94.9 120.6,94.3 117.6,93.4ZM182.7,93.5C182.3,92.7 183.9,89.9 186.5,86.9C192.1,80.3 192.3,79.2 192.4,46.5C192.5,18.2 192.1,16.0 186.9,9.4C185.3,7.4 184.0,4.9 184.0,3.8C184.0,1.1 188.4,-0.2 194.9,0.6C202.5,1.5 204.9,2.5 209.2,6.7L212.9,10.3L223.0,5.1C232.3,0.4 233.6,-0.0 240.1,0.0C248.2,0.0 252.3,1.5 259.7,7.0C262.6,9.2 265.6,11.0 266.5,11.0C267.4,11.0 271.1,9.2 274.8,7.0C283.2,1.9 287.7,0.6 296.5,0.5C302.1,0.5 304.6,1.0 308.4,3.0C320.0,9.0 321.7,15.0 322.5,53.0C322.9,67.6 323.3,80.4 323.5,81.5C323.8,82.6 325.5,85.3 327.5,87.4C329.4,89.6 331.0,92.2 331.0,93.2C331.0,94.9 329.8,95.0 315.1,95.0C303.3,95.0 299.1,94.7 298.7,93.8C298.5,93.1 299.4,90.3 300.8,87.5L303.2,82.6L302.8,55.0C302.4,29.0 302.3,27.3 300.1,23.2C296.9,17.0 292.9,14.8 285.7,15.3C279.0,15.7 272.8,19.4 269.5,25.0C267.6,28.3 267.5,30.1 267.5,55.7L267.5,82.9L271.8,87.2C279.1,94.8 278.7,95.0 258.0,95.0C236.8,95.0 236.0,94.6 243.1,87.4L247.5,82.9L247.5,55.7C247.5,30.0 247.4,28.3 245.3,23.8C242.5,17.7 240.4,16.7 231.4,17.2C225.1,17.5 223.6,17.9 220.3,20.6C218.2,22.2 215.5,25.7 214.2,28.2C211.9,32.7 211.8,33.9 211.7,58.2L211.5,83.5L214.7,87.8C219.8,94.7 219.3,95.0 200.0,95.0C186.2,95.0 183.1,94.7 182.7,93.5ZM447.6,93.0C438.7,88.5 434.5,80.7 435.2,70.0C435.5,66.4 436.4,62.1 437.3,60.3C441.4,52.4 450.8,46.6 465.5,43.1C470.4,41.9 476.6,40.4 479.2,39.8C482.1,39.1 485.1,37.5 486.7,35.8C489.0,33.4 489.4,32.1 489.4,27.7C489.2,18.0 484.1,12.3 474.7,11.3C467.7,10.6 464.2,12.4 458.4,20.0C453.9,25.8 449.6,28.5 445.6,28.2C442.3,28.0 439.0,23.4 439.0,19.2C439.0,7.5 455.3,-0.6 477.2,0.2C489.4,0.6 496.9,3.4 501.4,9.3C506.3,15.7 507.1,21.2 507.9,50.1C508.6,80.2 508.4,79.5 516.6,82.6C521.5,84.5 521.9,85.6 518.9,89.4C516.1,93.0 510.9,95.0 504.3,95.0C499.3,95.0 498.6,94.7 493.9,90.4L489.0,85.7L481.9,89.0C471.6,93.7 466.6,95.0 458.6,95.0C453.6,94.9 450.3,94.3 447.6,93.0ZM540.8,93.2C537.1,92.2 533.2,90.6 532.0,89.5C529.6,87.3 528.0,82.0 528.0,75.8C528.0,69.9 529.7,66.1 532.7,65.4C535.6,64.6 537.2,65.9 542.0,73.0C548.6,82.6 552.7,85.0 562.7,85.0C572.5,85.0 579.0,80.3 579.0,73.1C579.0,65.8 576.4,63.6 558.5,55.0C547.7,49.8 540.5,45.7 537.6,43.0C523.5,30.0 529.9,7.5 549.4,1.5C556.7,-0.7 571.3,-0.5 579.4,2.0C591.0,5.6 595.5,11.8 593.0,21.0C591.8,25.3 589.1,27.5 586.0,26.5C584.9,26.2 582.2,23.2 579.9,20.0C574.7,12.6 572.2,10.9 565.0,10.3C554.3,9.3 548.0,13.4 548.0,21.4C548.0,27.4 552.0,30.8 566.9,37.5C573.7,40.5 581.2,44.1 583.5,45.5C589.3,48.8 595.8,56.4 596.6,60.7C597.6,65.9 596.5,77.1 594.7,80.5C592.3,85.1 587.0,90.1 582.0,92.4C575.6,95.4 550.7,95.8 540.8,93.2ZM622.2,93.5C610.9,90.3 608.8,87.6 608.7,75.3C608.6,70.1 609.0,68.5 610.7,66.8C614.2,63.4 617.2,65.0 622.7,73.2C628.9,82.3 633.4,85.0 642.9,85.0C651.3,85.0 655.8,82.8 658.4,77.7C662.6,69.0 657.7,63.2 639.4,55.1C625.3,48.9 617.6,43.9 614.2,38.7C610.5,33.1 609.8,21.3 612.9,15.3C617.9,5.5 628.7,-0.0 643.1,-0.0C657.9,-0.0 669.3,3.9 672.5,10.0C676.0,16.7 672.8,27.6 667.7,26.8C666.6,26.6 663.6,23.8 661.1,20.6C654.5,12.2 652.1,10.7 644.6,10.2C637.0,9.7 631.7,11.8 629.5,16.1C625.6,23.6 628.9,28.6 641.8,34.7C647.1,37.2 654.6,40.7 658.5,42.5C675.5,50.6 681.1,61.3 676.4,76.9C674.5,83.4 667.2,91.2 661.4,93.1C655.4,95.0 628.6,95.3 622.2,93.5ZM717.6,93.4C710.9,91.3 706.3,88.2 700.4,81.7C685.0,64.9 685.4,31.5 701.1,13.6C714.4,-1.4 739.7,-4.6 758.6,6.5C774.0,15.5 782.3,39.2 777.6,61.0C775.5,70.5 772.7,76.4 767.3,82.1C757.9,92.2 750.5,95.0 733.6,94.9C726.8,94.9 720.6,94.3 717.6,93.4ZM145.2,81.4C153.7,75.5 156.9,67.5 157.7,50.5C158.3,37.5 157.1,29.6 153.2,22.0C149.3,14.3 144.0,10.7 135.5,10.2C119.9,9.2 111.3,19.9 110.3,42.1C108.9,69.9 118.1,85.7 135.3,84.7C139.7,84.4 142.0,83.7 145.2,81.4ZM742.6,82.9C752.2,78.3 756.8,68.8 757.7,52.0C758.7,32.7 754.8,19.6 746.2,13.6C742.8,11.2 740.7,10.5 735.5,10.2C718.9,9.1 710.0,21.9 710.0,47.0C710.0,66.6 715.5,78.8 726.5,83.6C731.0,85.6 737.8,85.3 742.6,82.9ZM391.8,81.1C399.3,77.3 403.5,70.0 405.2,58.0C407.6,41.5 403.2,24.5 394.7,17.6C391.1,14.7 390.2,14.5 383.2,14.5C376.1,14.5 375.1,14.8 370.4,17.9C361.6,23.7 361.5,24.1 361.5,50.2C361.5,76.0 361.6,76.5 370.0,80.8C375.8,83.7 386.4,83.9 391.8,81.1ZM477.6,79.9C480.1,78.7 483.6,76.3 485.5,74.5L489.0,71.3L489.0,61.2C489.0,49.8 489.1,50.0 480.6,50.0C469.9,50.0 460.2,54.9 456.4,62.2C455.6,63.8 454.9,67.4 454.8,70.2C454.8,76.5 457.2,80.0 462.6,81.7C467.5,83.2 471.9,82.7 477.6,79.9Z"/></svg></span><div class="micro" style="margin-top:8px">Find your direction</div></div>
+<nav class="bottom" id="nav" aria-label="主選單">
+  <a href="#classes" data-nav="classes">團課</a>
+  <a href="#program" data-nav="program">課表</a>
+  <a href="#library" data-nav="library">動作</a>
+  <a href="#plans" data-nav="plans">方案</a>
+</nav>
+<div class="sheet" id="sheet" hidden>
+  <div class="sheet-bg" data-close></div>
+  <form class="sheet-card" id="sheetForm" novalidate>
+    <button type="button" class="sheet-x" data-close aria-label="關閉">×</button>
+    <div class="micro" id="sheetKicker">Booking</div>
+    <h3 class="sheet-h" id="sheetTitle">預約團課</h3>
+    <p class="sheet-sub" id="sheetSub"></p>
+    <div class="field" id="fName"><label for="in-name">姓名</label><input id="in-name" name="name" autocomplete="name" maxlength="30" required></div>
+    <div class="field"><label for="in-phone">手機</label><input id="in-phone" name="phone" inputmode="tel" autocomplete="tel" placeholder="09xxxxxxxx" required></div>
+    <div class="field"><label for="in-pin">4 位數密碼</label><input id="in-pin" name="pin" type="password" inputmode="numeric" pattern="[0-9]{4}" maxlength="4" autocomplete="off" required><small id="pinHint">第一次預約時自己設定，之後查詢和取消都用這組密碼。</small></div>
+    <label class="check"><input type="checkbox" id="in-remember" checked> 在這支手機記住我</label>
+    <p class="sheet-err" id="sheetErr" role="alert"></p>
+    <button class="btn wide" type="submit" id="sheetGo">確認預約</button>
+  </form>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+/* ==========================================================
+   設定：部署 Google Apps Script 後，把網址貼在這裡
+   ========================================================== */
+const CONFIG = {
+  API_URL: "https://script.google.com/macros/s/AKfycbzNaBLegTu7hWmcKxZMee2n-Myc2nYA3aR7-KuwJhzrjNB1shNlh8IJIl06aOuBgM9GlQ/exec"
+};
+
+/* ---------- CONTENT ---------- */
+const ZH={HYBRID:"混合訓練",FORM:"技術與肌力",FORCE:"力量耐力",FLOW:"心肺引擎",RACE:"比賽模擬",RUN:"跑步"};
+// fixed weekly group slots — 0=Sun..6=Sat
+const SLOTS=[
+  {key:"wed0730",day:3,start:"07:30",end:"09:00",title:"COMPASSO 專屬團課",excl:true},
+  {key:"fri1900",day:5,start:"19:00",end:"20:00",title:"週五晚間團課"},
+  {key:"sat0730",day:6,start:"07:30",end:"09:00",title:"COMPASSO 專屬團課",excl:true},
+  {key:"sat0900",day:6,start:"09:00",end:"10:00",title:"週六團課"}
+];
+const SLOT_NAME=k=>{const s=SLOTS.find(x=>x.key===k);return s?`週${WD[s.day]} ${s.start}`:"其他時段";};
+const GROUP_BLOCKS={
+  long:[{n:"集合",t:"",items:["提早 10 分鐘到，教練說明今天的站點"]},{n:"暖身",t:"15'",items:["動態活動度、站點熟悉"]},{n:"主課",t:"55'",items:["跑步與 HYROX 站點交替循環","強度依個人狀況調整，組數由教練現場指定"]},{n:"收操",t:"10'",items:["伸展與本週重點回顧"]}],
+  short:[{n:"暖身",t:"10'",items:["動態活動度"]},{n:"主課",t:"40'",items:["站點循環或跑步間歇，依當週主題"]},{n:"收操",t:"10'",items:["伸展"]}]
+};
+const RUNS={
+  1:{code:"RECOVERY",zh:"恢復跑",min:"40",blocks:[{n:"恢復跑",t:"30–40'",items:["Zone 2，全程能完整說話","前一天練很累就走跑交替"]},{n:"活動度",t:"10'",items:["髖、小腿、胸椎"]}]},
+  2:{code:"INTERVAL",zh:"間歇跑",min:"50",blocks:[{n:"暖身",t:"15'",items:["輕鬆跑 12 分鐘，加速跑 3 趟"]},{n:"主課",t:"",items:["6 × 800m，5K 配速，組間慢跑 90 秒","剛開始練：4 組就好"]},{n:"收操",t:"10'",items:["慢跑轉走路，伸展"]}]},
+  4:{code:"TEMPO",zh:"節奏跑",min:"50",blocks:[{n:"暖身",t:"15'",items:["輕鬆跑"]},{n:"主課",t:"20'",items:["節奏配速：能說短句、不能聊天","剛開始練：2 × 10 分鐘，中間走 2 分鐘"]},{n:"收操",t:"10'",items:["慢跑與伸展"]}]},
+  0:{code:"LONG RUN",zh:"長距離",min:"60–90",blocks:[{n:"長跑",t:"60–90'",items:["輕鬆配速，最後 10 分鐘稍微加快","剛開始練：45 分鐘"]},{n:"補給",t:"",items:["超過 60 分鐘帶水，跑完 1 小時內吃一餐"]}]}
+};
+const DAY_SHORT={1:"恢復跑",2:"間歇",3:"團課",4:"節奏跑",5:"團課",6:"團課 ×2",0:"長跑"};
+const slotOf=c=>{if(c.slot)return c.slot;const d=new Date((c.date||"")+"T00:00:00").getDay();const s=SLOTS.find(x=>x.day===d&&x.start===(c.start||c.time));return s?s.key:"other";};
+const WD=["日","一","二","三","四","五","六"];
+const MOVES=[
+  {en:"Running",zh:"跑步",std:"8 × 1km，每個站點之間各一段",cues:["步頻約 170–180，著地在身體下方","出站後前 200m 刻意放慢，讓心率回落","手臂前後擺，不橫向交叉"],err:["一出站就衝，後段崩掉","大步幅浪費腿力"]},
+  {en:"SkiErg",zh:"滑雪機",std:"1000m",cues:["雙臂高舉、手肘微彎往下拉","髖部跟著下沉，力量來自軀幹","手過膝後放鬆回收"],err:["只用手臂拉","每下都深蹲，腿太早疲勞"]},
+  {en:"Sled Push",zh:"雪橇推",std:"50m｜男 152kg、女 102kg（含雪橇）",cues:["手臂伸直或微彎，身體壓低約 45 度","小步快頻，持續推不要停","前腳掌施力"],err:["身體太直，力量往上不往前","停下再起動最耗力"]},
+  {en:"Sled Pull",zh:"雪橇拉",std:"50m｜男 103kg、女 78kg（含雪橇）",cues:["坐低、重心後傾，用腿和背拉","雙手交替收繩，繩子放身側","每一拉都收到底"],err:["站直只用手拉","繩子纏腳"]},
+  {en:"Burpee Broad Jump",zh:"波比跳遠",std:"80m",cues:["胸口與大腿貼地","雙腳同時起跳、同時落地","找能一直重複的節奏，不求單次最遠"],err:["跳太遠，落地不穩","起身時手腳分次動作"]},
+  {en:"Row",zh:"划船機",std:"1000m",cues:["腿推、身體後倒、手拉","回程反過來","每分鐘 26–32 槳"],err:["先拉手再推腿","槳頻太高、每下太輕"]},
+  {en:"Farmers Carry",zh:"農夫走路",std:"200m｜男 2 × 24kg、女 2 × 16kg",cues:["握緊，肩膀往下往後","小步快走，視線向前","轉彎放慢，不要放下"],err:["聳肩讓前臂提早力竭","中途頻繁放下重拿"]},
+  {en:"Sandbag Lunges",zh:"沙袋弓箭步",std:"100m｜男 20kg、女 10kg",cues:["沙袋穩在肩上不晃","後膝每一步輕觸地","軀幹直立，前腳全腳掌踩穩"],err:["後膝沒碰地，不計次","身體前傾壓迫下背"]},
+  {en:"Wall Balls",zh:"牆球",std:"100 下｜男 6kg 至 3m、女 4kg 至 2.7m",cues:["蹲到髖低於膝","用腿把球送出去，不是用手","接球直接下蹲，連成一個動作"],err:["蹲不夠深，不計次","做到力竭才休息"]}
+];
+const PLANS=[
+  {n:"BASE",zh:"月訂閱",items:["固定週課表與跑步訓練","完整動作庫與教練提示"]},
+  {n:"PRO",zh:"進階解鎖",feature:true,items:["BASE 全部內容","比賽模擬與賽前減量課表","團課優先預約","每月一次課表調整"]},
+  {n:"CLASS",zh:"團課堂數",items:["週三、五、六實體團課","在這裡預約，剩餘堂數即時查看"]}
+];
+
+
+/* ---------- STATE ---------- */
+const S={sessions:[],state:"loading",me:null,cred:null,selDay:new Date().getDay(),busy:false,pending:null,mode:"book"};
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const ymd=d=>d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+const todayStr=()=>ymd(new Date());
+const startOf=c=>c.start||"";
+const endOf=c=>c.end||"";
+const DIAL_ORDER=[1,2,3,4,5,6,0];
+function toast(m){const t=$("#toast");t.textContent=m;t.classList.add("show");clearTimeout(toast.t);toast.t=setTimeout(()=>t.classList.remove("show"),2600);}
+const ERR={FULL:"這堂已額滿",NO_CREDITS:"堂數已用完，請聯繫教練加購",BAD_PIN:"密碼不對，請再試一次",DUPLICATE:"你已經預約這堂了",CLOSED:"這堂已經開始，不能再預約或取消",NOT_FOUND:"找不到這筆資料，可能已經取消",BUSY:"預約的人有點多，請再按一次",INVALID:"請確認姓名、手機（09 開頭 10 碼）和 4 位數密碼",SERVER:"系統暫時出錯，請稍後再試",NETWORK:"連線失敗，請確認網路後再試"};
+
+/* ---------- API ---------- */
+const apiReady=()=>/^https:\/\/script\.google(usercontent)?\.com\//.test(CONFIG.API_URL);
+async function api(action,body){
+  if(!apiReady())throw {error:"NOT_CONFIGURED"};
+  let r;
+  try{
+    r=body?await fetch(CONFIG.API_URL,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(Object.assign({action},body))})
+          :await fetch(CONFIG.API_URL+"?action="+encodeURIComponent(action));
+    return await r.json();
+  }catch(e){return {ok:false,error:"NETWORK"};}
+}
+function loadCred(){try{return JSON.parse(localStorage.getItem("cmp_member")||"null");}catch(e){return null;}}
+function saveCred(c){try{localStorage.setItem("cmp_member",JSON.stringify(c));}catch(e){}}
+function clearCred(){try{localStorage.removeItem("cmp_member");}catch(e){}}
+
+async function loadSessions(){
+  try{const r=await api("sessions");if(r.ok){S.sessions=r.sessions;S.state="ready";}else S.state="error";}
+  catch(e){S.state=e&&e.error==="NOT_CONFIGURED"?"unconfigured":"error";}
+  renderAll();
+}
+async function loadMe(){
+  S.cred=loadCred();
+  if(!S.cred||!apiReady()){S.me=null;renderClasses();return;}
+  const r=await api("me",{phone:S.cred.phone,pin:S.cred.pin});
+  if(r.ok)S.me=r;else{S.me=null;if(r.error==="BAD_PIN"||r.error==="NOT_FOUND"){clearCred();S.cred=null;}}
+  renderClasses();
+}
+
+/* ---------- DIAL / TODAY / PROGRAM ---------- */
+function renderToday(){
+  const d=new Date(),dw=d.getDay(),slots=SLOTS.filter(x=>x.day===dw),run=RUNS[dw];
+  let txt;
+  if(slots.length){
+    const today=S.sessions.filter(c=>c.date===todayStr()).sort((a,b)=>startOf(a).localeCompare(startOf(b)));
+    const list=(today.length?today.map(c=>`${startOf(c)} ${c.title}`):slots.map(x=>`${x.start} ${x.title}`)).join("、");
+    txt=`<span class="k">TODAY · GROUP</span><span class="s">${esc(list)}</span>`;
+  }else if(run)txt=`<span class="k">${run.code}</span><span class="s">今天：${run.zh}，約 ${run.min} 分鐘</span>`;
+  else txt=`<span class="k">REST</span><span class="s">今天恢復。散步、伸展、睡足。</span>`;
+  $("#todayLine").innerHTML=`${txt}<button type="button" id="seeToday">看今天的內容</button>`;
+  $("#seeToday").onclick=()=>{S.selDay=dw;location.hash="program";renderProgram();};
+}
+
+/* ---------- PROGRAM ---------- */
+function blocksHTML(bl){return bl.map(b=>`<div class="blk"><div class="n">${esc(b.n)}${b.t?`<small>${esc(b.t)}</small>`:""}</div><ul>${b.items.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div>`).join("");}
+function renderProgram(){
+  const today=new Date().getDay();
+  $("#week").innerHTML=DIAL_ORDER.map(d=>{const g=SLOTS.some(x=>x.day===d);return `<button class="wd ${g?"group":""} ${d===S.selDay?"sel":""}" aria-current="${d===today}" data-d="${d}"><div class="a">${d===today?"今天":"週"+WD[d]}</div><div class="b">${DAY_SHORT[d]||"休"}</div></button>`;}).join("");
+  $("#week").querySelectorAll(".wd").forEach(x=>x.onclick=()=>{S.selDay=+x.dataset.d;renderProgram();});
+  const d=S.selDay,slots=SLOTS.filter(x=>x.day===d),run=RUNS[d];
+  let out="";
+  slots.forEach(s=>{
+    out+=`<div class="session"><div class="title"><b>${s.start}–${s.end}</b><span>${s.excl?"COMPASSO 專屬":"團課"}，請先預約</span></div><div class="zh">${esc(s.title)}，PULSE GYM</div>${blocksHTML(s.excl?GROUP_BLOCKS.long:GROUP_BLOCKS.short)}<p style="margin-top:14px"><a class="link" href="#classes">去預約</a></p></div>`;
+  });
+  if(run) out+=`<div class="session"><div class="title"><b>${run.code}</b><span>約 ${run.min} 分鐘，自主訓練</span></div><div class="zh">${run.zh}</div>${blocksHTML(run.blocks)}</div>`;
+  $("#dayDetail").innerHTML=out||`<p class="rest-note">週${WD[d]}休息。散步 20–30 分鐘、伸展、睡足，恢復也是訓練。</p>`;
+}
+
+/* ---------- LIBRARY & PLANS ---------- */
+function renderLibrary(){
+  $("#library").innerHTML=MOVES.map((m,i)=>`<div class="mv" data-open="false"><button type="button" aria-expanded="false" aria-controls="mv${i}">
+    <span><span class="en">${esc(m.en)}</span><span class="zhn">${esc(m.zh)}</span></span><span class="pm" aria-hidden="true">+</span><span class="std">${esc(m.std)}</span></button>
+    <div class="more" id="mv${i}"><div><h4>教練提示</h4><ul>${m.cues.map(c=>`<li>${esc(c)}</li>`).join("")}</ul></div><div><h4>常見錯誤</h4><ul>${m.err.map(c=>`<li>${esc(c)}</li>`).join("")}</ul></div></div></div>`).join("");
+  $("#library").querySelectorAll(".mv>button").forEach(b=>b.onclick=()=>{const p=b.parentElement,o=p.dataset.open!=="true";p.dataset.open=o;b.setAttribute("aria-expanded",o);});
+}
+function renderPlans(){
+  $("#plans").innerHTML=PLANS.map(p=>`<div class="plan ${p.feature?"feature":""}"><div><div class="pn">${p.n}</div><div class="pz">${p.zh}</div><div class="pp">價格未定</div></div><ul>${p.items.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div>`).join("");
+}
+
+
+/* ---------- CLASSES ---------- */
+function dparts(ds){const d=new Date(ds+"T00:00:00");return isNaN(d)?{d:ds,w:""}:{d:`${d.getMonth()+1}/${d.getDate()}`,w:"週"+WD[d.getDay()]};}
+function seats(n,cap,full){let s="";for(let i=0;i<cap;i++)s+=`<i class="${i<n?"f":""}"></i>`;return `<div class="seats ${full?"full":""}" aria-hidden="true">${s}</div>`;}
+const myBooking=sid=>S.me&&S.me.bookings.find(b=>b.sessionId===sid);
+const upcoming=()=>S.sessions;
+function classRow(c){
+  const n=c.booked,cap=+c.capacity||0,full=n>=cap,mine=myBooking(c.id),p=dparts(c.date);
+  let btn;
+  if(c.closed)btn=`<button class="btn" disabled>已開始</button>`;
+  else if(mine)btn=`<button class="btn line" data-cancel="${esc(mine.bookingId)}">取消預約</button>`;
+  else btn=`<button class="btn" data-book="${esc(c.id)}" ${full?"disabled":""}>${full?"額滿":"預約"}</button>`;
+  return `<div class="cls"><div class="date"><div class="d">${p.d}</div><div class="w">${p.w}</div></div>
+    <div><div class="time">${esc(c.start)}–${esc(c.end)}</div><div class="meta">${esc(c.title)}${c.location?"，"+esc(c.location):""}</div>${c.exclusive?'<div class="excl">COMPASSO 專屬</div>':""}
+    ${seats(n,Math.min(cap,40),full)}<div class="cnt">${full?"已額滿":`已預約 ${n} 人，剩 ${cap-n} 個位子`}</div>${mine?'<div class="mine">你已預約這堂</div>':""}</div>
+    <div class="act">${btn}</div></div>`;
+}
+function renderMe(){
+  const el=$("#me");
+  if(S.state==="unconfigured"){el.innerHTML="";return;}
+  if(!S.me){el.innerHTML=`<div class="mebar"><span class="mute" style="font-size:14px;color:var(--dim)">預約過的會員，可以在這裡查看剩餘堂數和自己的預約。</span><button class="ghost" id="loginBtn" type="button">查看我的預約</button></div>`;
+    $("#loginBtn").onclick=()=>openSheet("login");return;}
+  const m=S.me,left=m.credits===null?null:Math.max(0,m.credits-m.used);
+  el.innerHTML=`<div class="credit"><span class="n">${left===null?m.bookings.length:left}</span><span class="t">${left===null?"堂即將上課":"堂剩餘"}<br>${esc(m.name)}${m.plan?"，"+esc(m.plan):""}${m.credits!==null?`，購買 ${m.credits}，已使用 ${m.used}`:""}</span></div>
+    ${m.bookings.length?`<div class="mine-list">${m.bookings.map(b=>{const p=dparts(b.date);return `<div class="mine-row"><span><b>${p.d} ${p.w}</b>${esc(b.start)} ${esc(b.title)}</span>${b.closed?'<span class="ghost">已開始</span>':`<button class="ghost" data-cancel="${esc(b.bookingId)}">取消</button>`}</div>`;}).join("")}</div>`:""}
+    <div class="mebar" style="border-bottom:none"><span></span><button class="ghost" id="logoutBtn" type="button">不是你？登出這支手機</button></div>`;
+  $("#logoutBtn").onclick=()=>{clearCred();S.cred=null;S.me=null;renderClasses();toast("已登出");};
+}
+function renderClasses(){
+  const st=$("#dbStatus");
+  st.innerHTML=S.state==="unconfigured"?`<p class="notice">預約系統尚未連線：請在 index.html 的 CONFIG.API_URL 貼上 Google Apps Script 網址。</p>`
+    :S.state==="error"?`<p class="notice">團課資料暫時讀不到，請稍後重新整理。</p>`
+    :S.state==="loading"?`<p class="notice">讀取團課中…</p>`:"";
+  renderMe();
+  const up=upcoming();
+  $("#upCount").textContent=up.length?`${up.length} 堂`:"";
+  $("#classList").innerHTML=up.length?up.map(classRow).join(""):(S.state==="ready"?`<p class="empty">下一期團課還沒開放預約。</p>`:"");
+  document.querySelectorAll("#classes-root [data-book],#classList [data-book]").forEach(b=>b.onclick=()=>openSheet("book",b.dataset.book));
+  document.querySelectorAll("[data-cancel]").forEach(b=>b.onclick=()=>cancelBooking(b.dataset.cancel,b));
+}
+
+/* ---------- BOOKING SHEET ---------- */
+function openSheet(mode,sid){
+  S.mode=mode;S.pending=sid||null;
+  const c=S.sessions.find(x=>x.id===sid),cr=loadCred();
+  $("#sheetKicker").textContent=mode==="book"?"Booking":"Member";
+  $("#sheetTitle").textContent=mode==="book"?"預約團課":"查看我的預約";
+  $("#sheetSub").textContent=c?`${dparts(c.date).d} ${dparts(c.date).w} ${c.start}–${c.end}，${c.title}`:"輸入預約時用的手機和密碼。";
+  $("#fName").hidden=mode!=="book";
+  $("#pinHint").hidden=mode!=="book";
+  $("#in-name").value=cr?cr.name||"":"";$("#in-phone").value=cr?cr.phone:"";$("#in-pin").value=cr?cr.pin:"";
+  $("#sheetErr").textContent="";
+  $("#sheetGo").textContent=mode==="book"?"確認預約":"查看";
+  $("#sheet").hidden=false;
+  setTimeout(()=>{(mode==="book"&&!$("#in-name").value?$("#in-name"):$("#in-phone")).focus();},50);
+}
+function closeSheet(){$("#sheet").hidden=true;}
+document.querySelectorAll("[data-close]").forEach(x=>x.onclick=closeSheet);
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!$("#sheet").hidden)closeSheet();});
+$("#sheetForm").addEventListener("submit",async e=>{
+  e.preventDefault();if(S.busy)return;
+  const name=$("#in-name").value.trim(),phone=$("#in-phone").value.replace(/\D/g,""),pin=$("#in-pin").value.trim();
+  if((S.mode==="book"&&!name)||!/^09\d{8}$/.test(phone)||!/^\d{4}$/.test(pin)){$("#sheetErr").textContent=ERR.INVALID;return;}
+  S.busy=true;const go=$("#sheetGo");go.disabled=true;go.textContent="處理中…";
+  const r=S.mode==="book"?await api("book",{sessionId:S.pending,name,phone,pin}):await api("me",{phone,pin});
+  S.busy=false;go.disabled=false;go.textContent=S.mode==="book"?"確認預約":"查看";
+  if(!r.ok){$("#sheetErr").textContent=S.mode==="login"&&r.error==="NOT_FOUND"?"找不到這支手機的預約紀錄":(ERR[r.error]||ERR.SERVER);if(r.error==="FULL")loadSessions();return;}
+  const keep={name:name||(S.cred&&S.cred.name)||(r.name||""),phone,pin};
+  if($("#in-remember").checked)saveCred(keep);else clearCred();
+  S.cred=keep;
+  if(S.mode==="login"){S.me=r;closeSheet();renderClasses();toast("歡迎回來，"+r.name);return;}
+  closeSheet();toast("已預約，到時見");
+  await loadSessions();
+  if($("#in-remember").checked)await loadMe();else{const m=await api("me",{phone,pin});if(m.ok){S.me=m;renderClasses();}}
+});
+async function cancelBooking(bid,btn){
+  const c=S.cred||loadCred();if(!c){openSheet("login");return;}
+  if(btn.dataset.sure!=="1"){btn.dataset.sure="1";const t=btn.textContent;btn.textContent="再按一次確認取消";setTimeout(()=>{if(btn.isConnected){btn.dataset.sure="";btn.textContent=t;}},3500);return;}
+  btn.disabled=true;
+  const r=await api("cancel",{bookingId:bid,phone:c.phone,pin:c.pin});
+  if(!r.ok){toast(ERR[r.error]||ERR.SERVER);btn.disabled=false;return;}
+  toast("已取消，位子已釋出");
+  await loadSessions();
+  const m=await api("me",{phone:c.phone,pin:c.pin});if(m.ok){S.me=m;}renderClasses();
+}
+
+/* ---------- ROUTING ---------- */
+const VIEWS=["classes","program","library","plans"];
+function route(){
+  let v=(location.hash||"#classes").slice(1);if(!VIEWS.includes(v))v="classes";
+  document.querySelectorAll("[data-view]").forEach(s=>s.classList.toggle("hidden",s.dataset.view!==v));
+  document.querySelectorAll("[data-nav]").forEach(a=>{a.removeAttribute("aria-current");if(a.dataset.nav===v)a.setAttribute("aria-current","page");});
+}
+function renderAll(){renderToday();renderProgram();renderClasses();}
+window.addEventListener("hashchange",()=>{route();const s=document.querySelector(`[data-view]:not(.hidden)`);if(s)s.scrollIntoView({behavior:matchMedia("(prefers-reduced-motion:reduce)").matches?"auto":"smooth",block:"start"});});
+
+/* ---------- INIT ---------- */
+(function init(){
+  const h=new Date().getHours();$("#greet").textContent=(h<11?"早安":h<18?"午安":"晚安")+"。每週三、五、六，一起出發。";
+  renderLibrary();renderPlans();renderAll();route();
+  loadSessions();loadMe();
+})();
+</script>
+</body>
+</html>
