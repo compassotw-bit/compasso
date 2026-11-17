@@ -275,6 +275,18 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:20;opa
 .pay{margin-top:32px;padding:18px 0;border-top:1px solid var(--rule);border-bottom:1px solid var(--rule);font-size:15px;text-align:center}
 .pay b{display:block;font-family:var(--wide);font-stretch:112%;font-size:10.5px;font-weight:600;letter-spacing:.3em;color:var(--dim);margin-bottom:6px}
 @media (max-width:620px){.join{grid-template-columns:1fr;justify-items:center;text-align:center}.join-qr{width:200px}.join-btns{justify-content:center}.join-txt p{margin-left:auto;margin-right:auto}}
+
+.plan{display:flex;flex-direction:column}
+.plan .pw{font-size:13px;margin-top:14px;line-height:1.6;white-space:pre-line}
+.plan .pr{font-family:var(--display);font-weight:300;font-size:34px;line-height:1;margin:16px 0 16px;letter-spacing:.02em}
+.plan .pr small{font-family:var(--body);font-size:13px;color:var(--dim);margin-left:4px;letter-spacing:0}
+.plan.feature .pr small{color:rgba(20,20,16,.6)}
+.plan ul{flex:1}
+.plan .pp{margin:14px 0 0}
+.pcta{display:flex;flex-direction:column;gap:8px;margin-top:16px}
+.pcta .btn{text-decoration:none;text-align:center;font-size:10.5px;padding:12px 10px}
+.plan.feature .pcta .btn{background:var(--ink);color:var(--bone);box-shadow:none}
+.plan.feature .pcta .btn.line{background:transparent;color:var(--ink);box-shadow:inset 0 0 0 1px rgba(20,20,16,.4)}
 </style>
 </head>
 <body>
@@ -342,7 +354,7 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:20;opa
   <!-- PLANS -->
   <section class="view hidden" data-view="plans" data-i=".04">
     <h2 class="h">MEMBERSHIP<small>方案</small></h2>
-    <p class="intro">選好方案，到 PULSE 藝文店櫃台結帳即可。結帳後由教練幫你開通堂數，之後在網站上預約。</p>
+    <p class="intro">三種訓練方式，依你現在的程度選。BASE 和 CLASS 到 PULSE 藝文店櫃台結帳，PRO 請私訊正宏教練。</p>
     <div id="plans" class="plans"></div>
     <div class="join">
       <div class="join-qr"><img src="img/line-qr.png" alt="COMPASSO LINE 群 QR code" width="600" height="600" loading="lazy"></div>
@@ -356,7 +368,7 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:20;opa
         </div>
       </div>
     </div>
-    <div class="pay"><b>結帳方式</b>到 PULSE 藝文店櫃台結帳即可。</div>
+    <div class="pay"><b>結帳方式</b>BASE、CLASS：到 PULSE 藝文店櫃台結帳<br>PRO：私訊正宏教練詳談，不在櫃台結帳</div>
     <div class="contact"><b>其他問題</b>電話 0911-236-909<br>compassotw@gmail.com</div>
   </section>
 
@@ -430,9 +442,9 @@ const MOVES=[
   {en:"Wall Balls",zh:"牆球",std:"100 下｜男 6kg 至 3m、女 4kg 至 2.7m",cues:["蹲到髖低於膝","用腿把球送出去，不是用手","接球直接下蹲，連成一個動作"],err:["蹲不夠深，不計次","做到力竭才休息"]}
 ];
 const PLANS=[
-  {n:"BASE",zh:"月訂閱",items:["週三、五、六固定課表","完整動作庫與教練提示"]},
-  {n:"PRO",zh:"進階解鎖",feature:true,items:["BASE 全部內容","比賽模擬與賽前減量課表","團課優先預約","每月一次課表調整"]},
-  {n:"CLASS",zh:"團課堂數",items:["週三、五、六實體團課","在這裡預約，剩餘堂數即時查看"]}
+  {n:"BASE",zh:"跟練團課",when:"週三、週六 07:30–09:00",price:"NT$300",unit:"／堂",items:["跟著正宏的課表訓練，不教學、只跟練","適合有基礎、想維持訓練強度的你","週三團課以 COMPASSO 會員為主"],pay:"PULSE 藝文店櫃台結帳"},
+  {n:"PRO",zh:"一對一教練",feature:true,when:"時間與地點另約",price:"私訊詳談",unit:"",items:["依目標量身安排的個人課表","日常飲食習慣規劃與體態管理陪跑","一對一、一對二或線上進行"],pay:"不在櫃台結帳",cta:[{t:"認識正宏教練",u:"https://cheng-hung-coaching.givingsole20.chatgpt.site"},{t:"私訊 @cheng___hung",u:"https://www.instagram.com/cheng___hung/"}]},
+  {n:"CLASS",zh:"教練指導團課",when:"週五 19:00–20:00\n週六 09:00–10:00",price:"NT$800",unit:"／堂",items:["正宏教練親自下場看動作","依你的狀況做專業調整","每堂上限 8 人"],pay:"PULSE 藝文店櫃台結帳"}
 ];
 
 
@@ -508,7 +520,7 @@ function renderLibrary(){
   $("#library").querySelectorAll(".mv>button").forEach(b=>b.onclick=()=>{const p=b.parentElement,o=p.dataset.open!=="true";p.dataset.open=o;b.setAttribute("aria-expanded",o);});
 }
 function renderPlans(){
-  $("#plans").innerHTML=PLANS.map(p=>`<div class="plan ${p.feature?"feature":""}"><div><div class="pn">${p.n}</div><div class="pz">${p.zh}</div><div class="pp">櫃台結帳</div></div><ul>${p.items.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div>`).join("");
+  $("#plans").innerHTML=PLANS.map(p=>`<div class="plan ${p.feature?"feature":""}"><div><div class="pn">${p.n}</div><div class="pz">${esc(p.zh)}</div><div class="pw">${esc(p.when)}</div><div class="pr">${esc(p.price)}<small>${esc(p.unit)}</small></div></div><ul>${p.items.map(x=>`<li>${esc(x)}</li>`).join("")}</ul><div class="pp">${esc(p.pay)}</div>${p.cta?`<div class="pcta">${p.cta.map((c,i)=>`<a class="btn ${i?"line":""}" href="${c.u}" target="_blank" rel="noopener">${esc(c.t)}</a>`).join("")}</div>`:""}</div>`).join("");
 }
 
 
