@@ -292,6 +292,12 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:20;opa
 .join-steps li{counter-increment:s;position:relative;padding:9px 0 9px 30px;border-bottom:1px solid var(--rule);font-size:14px;line-height:1.6;text-align:left}
 .join-steps li::before{content:counter(s);position:absolute;left:0;top:9px;font-family:var(--display);font-size:13px;color:var(--dim)}
 @media (max-width:620px){.join-steps{margin-left:auto;margin-right:auto}}
+
+.credits2{display:grid;grid-template-columns:1fr 1fr;gap:24px;border-bottom:1px solid var(--rule)}
+.credits2 .credit{border-bottom:none}
+.credits2 .credit .t b{color:var(--bone);letter-spacing:.12em;font-weight:600}
+.mehint{font-size:13px;color:var(--dim);padding:12px 0;border-bottom:1px solid var(--rule)}
+@media (max-width:620px){.credits2{gap:12px}.credits2 .credit .n{font-size:56px}}
 </style>
 </head>
 <body>
@@ -427,7 +433,7 @@ const SLOTS=[
 ];
 const SLOT_NAME=k=>{const s=SLOTS.find(x=>x.key===k);return s?`週${WD[s.day]} ${s.start}`:"其他時段";};
 const GROUP_BLOCKS={
-  long:[{n:"集合",t:"",items:["提早 10 分鐘到，教練說明今天的站點"]},{n:"暖身",t:"15'",items:["動態活動度、站點熟悉"]},{n:"主課",t:"55'",items:["跑步與 HYROX 站點交替循環","強度依個人狀況調整，組數由教練現場指定"]},{n:"收操",t:"10'",items:["伸展與本週重點回顧"]}],
+  long:[{n:"集合",t:"",items:["07:30 準時集合，教練說明今天的站點","請先吃好早餐，並評估自己當天的身體狀況"]},{n:"暖身",t:"15'",items:["動態活動度、站點熟悉"]},{n:"主課",t:"55'",items:["跑步與 HYROX 站點交替循環","強度依個人狀況調整，組數由教練現場指定"]},{n:"收操",t:"10'",items:["伸展與本週重點回顧"]}],
   short:[{n:"暖身",t:"10'",items:["動態活動度"]},{n:"主課",t:"40'",items:["站點循環或跑步間歇，依當週主題"]},{n:"收操",t:"10'",items:["伸展"]}]
 };
 const RUNS_UNUSED={
@@ -468,7 +474,8 @@ const startOf=c=>c.start||"";
 const endOf=c=>c.end||"";
 const DIAL_ORDER=[1,2,3,4,5,6,0];
 function toast(m){const t=$("#toast");t.textContent=m;t.classList.add("show");clearTimeout(toast.t);toast.t=setTimeout(()=>t.classList.remove("show"),2600);}
-const ERR={FULL:"這堂已額滿",NO_CREDITS:"堂數已用完，請聯繫教練加購",BAD_PIN:"密碼不對，請再試一次",DUPLICATE:"你已經預約這堂了",CLOSED:"這堂已經開始，不能再預約或取消",NOT_FOUND:"找不到這筆資料，可能已經取消",BUSY:"預約的人有點多，請再按一次",INVALID:"請確認姓名、手機（09 開頭 10 碼）和 4 位數密碼",SERVER:"系統暫時出錯，請稍後再試",NETWORK:"連線失敗，請確認網路後再試"};
+const errMsg=r=>r.error==="NO_CREDITS"&&r.type?`${r.type} 堂數已用完，請到 PULSE 藝文店櫃台加購`:(ERR[r.error]||ERR.SERVER);
+const ERR={FULL:"這堂已額滿",NO_CREDITS:"堂數已用完，請到 PULSE 藝文店櫃台加購",NEED_CLASS:"BASE 需先上過一堂 CLASS（週五 19:00 或週六 09:00），上完由教練開通後即可預約",BAD_PIN:"密碼不對，請再試一次",DUPLICATE:"你已經預約這堂了",CLOSED:"這堂已經開始，不能再預約或取消",NOT_FOUND:"找不到這筆資料，可能已經取消",BUSY:"預約的人有點多，請再按一次",INVALID:"請確認姓名、手機（09 開頭 10 碼）和 4 位數密碼",SERVER:"系統暫時出錯，請稍後再試",NETWORK:"連線失敗，請確認網路後再試"};
 
 /* ---------- API ---------- */
 const apiReady=()=>/^https:\/\/script\.google(usercontent)?\.com\//.test(CONFIG.API_URL);
@@ -539,6 +546,7 @@ function dparts(ds){const d=new Date(ds+"T00:00:00");return isNaN(d)?{d:ds,w:""}
 function seats(n,cap,full){let s="";for(let i=0;i<cap;i++)s+=`<i class="${i<n?"f":""}"></i>`;return `<div class="seats ${full?"full":""}" aria-hidden="true">${s}</div>`;}
 const myBooking=sid=>S.me&&S.me.bookings.find(b=>b.sessionId===sid);
 const upcoming=()=>S.sessions;
+const typeTag=c=>{const t=c.type||(c.exclusive?"BASE":"CLASS");return `<div class="excl">${t==="BASE"?"BASE · Open Training · NT$300":"CLASS · 教練指導 · NT$800"}</div>`;};
 function classRow(c){
   const n=c.booked,cap=+c.capacity||0,full=n>=cap,mine=myBooking(c.id),p=dparts(c.date);
   let btn;
@@ -546,7 +554,7 @@ function classRow(c){
   else if(mine)btn=`<button class="btn line" data-cancel="${esc(mine.bookingId)}">取消預約</button>`;
   else btn=`<button class="btn" data-book="${esc(c.id)}" ${full?"disabled":""}>${full?"額滿":"預約"}</button>`;
   return `<div class="cls"><div class="date"><div class="d">${p.d}</div><div class="w">${p.w}</div></div>
-    <div><div class="time">${esc(c.start)}–${esc(c.end)}</div><div class="meta">${esc(c.title)}${c.location?"，"+esc(c.location):""}</div>${c.exclusive?'<div class="excl">COMPASSO 專屬</div>':""}
+    <div><div class="time">${esc(c.start)}–${esc(c.end)}</div><div class="meta">${esc(c.title)}${c.location?"，"+esc(c.location):""}</div>${typeTag(c)}${(c.type||(c.exclusive?"BASE":"CLASS"))==="BASE"&&S.me&&S.me.baseOk===false&&!mine?'<div class="cnt">需先上過一堂 CLASS 才能預約</div>':""}
     ${seats(n,Math.min(cap,40),full)}<div class="cnt">${full?"已額滿":`已預約 ${n} 人，剩 ${cap-n} 個位子`}</div>${mine?'<div class="mine">你已預約這堂</div>':""}</div>
     <div class="act">${btn}</div></div>`;
 }
@@ -555,8 +563,11 @@ function renderMe(){
   if(S.state==="unconfigured"){el.innerHTML="";return;}
   if(!S.me){el.innerHTML=`<div class="mebar"><span class="mute" style="font-size:14px;color:var(--dim)">預約過的會員，可以在這裡查看剩餘堂數和自己的預約。</span><button class="ghost" id="loginBtn" type="button">查看我的預約</button></div>`;
     $("#loginBtn").onclick=()=>openSheet("login");return;}
-  const m=S.me,left=m.credits===null?null:Math.max(0,m.credits-m.used);
-  el.innerHTML=`<div class="credit"><span class="n">${left===null?m.bookings.length:left}</span><span class="t">${left===null?"堂即將上課":"堂剩餘"}<br>${esc(m.name)}${m.plan?"，"+esc(m.plan):""}${m.credits!==null?`，購買 ${m.credits}，已使用 ${m.used}`:""}</span></div>
+  const m=S.me;
+  const cblock=(lab,c)=>{const left=c.credits===null?null:Math.max(0,c.credits-c.used);return `<div class="credit"><span class="n">${left===null?"—":left}</span><span class="t"><b>${lab}</b><br>${left===null?`未設定堂數，已上 ${c.used} 堂`:`剩餘堂數，購買 ${c.credits}，已使用 ${c.used}`}</span></div>`;};
+  const head=m.base?`<div class="credits2">${cblock("BASE",m.base)}${cblock("CLASS",m.cls)}</div><p class="mehint">${esc(m.name)}${m.baseOk?"，可預約 BASE 與 CLASS":"，先上一堂 CLASS，教練開通後就能預約 BASE"}</p>`
+    :(()=>{const left=m.credits===null?null:Math.max(0,m.credits-m.used);return `<div class="credit"><span class="n">${left===null?m.bookings.length:left}</span><span class="t">${left===null?"堂即將上課":"堂剩餘"}<br>${esc(m.name)}</span></div>`;})();
+  el.innerHTML=`${head}
     ${m.bookings.length?`<div class="mine-list">${m.bookings.map(b=>{const p=dparts(b.date);return `<div class="mine-row"><span><b>${p.d} ${p.w}</b>${esc(b.start)} ${esc(b.title)}</span>${b.closed?'<span class="ghost">已開始</span>':`<button class="ghost" data-cancel="${esc(b.bookingId)}">取消</button>`}</div>`;}).join("")}</div>`:""}
     <div class="mebar" style="border-bottom:none"><span></span><button class="ghost" id="logoutBtn" type="button">不是你？登出這支手機</button></div>`;
   $("#logoutBtn").onclick=()=>{clearCred();S.cred=null;S.me=null;renderClasses();toast("已登出");};
@@ -599,7 +610,7 @@ $("#sheetForm").addEventListener("submit",async e=>{
   S.busy=true;const go=$("#sheetGo");go.disabled=true;go.textContent="處理中…";
   const r=S.mode==="book"?await api("book",{sessionId:S.pending,name,phone,pin}):await api("me",{phone,pin});
   S.busy=false;go.disabled=false;go.textContent=S.mode==="book"?"確認預約":"查看";
-  if(!r.ok){$("#sheetErr").textContent=S.mode==="login"&&r.error==="NOT_FOUND"?"找不到這支手機的預約紀錄":(ERR[r.error]||ERR.SERVER);if(r.error==="FULL")loadSessions();return;}
+  if(!r.ok){$("#sheetErr").textContent=S.mode==="login"&&r.error==="NOT_FOUND"?"找不到這支手機的預約紀錄":errMsg(r);if(r.error==="FULL")loadSessions();return;}
   const keep={name:name||(S.cred&&S.cred.name)||(r.name||""),phone,pin};
   if($("#in-remember").checked)saveCred(keep);else clearCred();
   S.cred=keep;
@@ -613,7 +624,7 @@ async function cancelBooking(bid,btn){
   if(btn.dataset.sure!=="1"){btn.dataset.sure="1";const t=btn.textContent;btn.textContent="再按一次確認取消";setTimeout(()=>{if(btn.isConnected){btn.dataset.sure="";btn.textContent=t;}},3500);return;}
   btn.disabled=true;
   const r=await api("cancel",{bookingId:bid,phone:c.phone,pin:c.pin});
-  if(!r.ok){toast(ERR[r.error]||ERR.SERVER);btn.disabled=false;return;}
+  if(!r.ok){toast(errMsg(r));btn.disabled=false;return;}
   toast("已取消，位子已釋出");
   await loadSessions();
   const m=await api("me",{phone:c.phone,pin:c.pin});if(m.ok){S.me=m;}renderClasses();
